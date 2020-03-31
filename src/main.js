@@ -1,6 +1,6 @@
 "use strict";
 
-const ROUT_POINTS_COUNT = 3;
+const ROUTE_POINTS_COUNT = 3;
 
 const createRouteInfoTemplate = () => {
   return (
@@ -320,6 +320,6 @@ render(tripSorting, createSortingTemplate(), `afterend`);
 
 render(tripEvents, createRoutePointEditTemplate());
 
-for (let i = 0; i < ROUT_POINTS_COUNT; i++) {
+for (let i = 0; i < ROUTE_POINTS_COUNT; i++) {
   render(tripEvents, createRoutePointTemplate());
 }
