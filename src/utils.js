@@ -6,13 +6,7 @@ const MINUTES_IN_HOUR = 60;
 const HOURS_IN_DAY = 24;
 
 export const uniqueItems = (arr) => {
-  let result = [];
-  for (const str of arr) {
-    if (!result.includes(str)) {
-      result.push(str);
-    }
-  }
-  return result;
+  return Array.from(new Set(arr));
 };
 
 const setZeroAtStart = (number) => {

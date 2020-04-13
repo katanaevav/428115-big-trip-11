@@ -42,7 +42,7 @@ render(days, createDayTemplate(dayNumber + 1, routePoints[0].eventStartDate));
 let dayEventsList = days.querySelector(`.trip-days__item:last-child .trip-events__list`);
 render(dayEventsList, createRoutePointEditTemplate(routePoints[0]));
 
-for (const [index, routePoint] of routePoints.entries()) {
+routePoints.forEach((routePoint, index) => {
   if (index > 0) {
     if (getDatesDuration(routePoints[0].eventStartDate, routePoint.eventStartDate).daysBetween > dayNumber) {
       dayNumber = getDatesDuration(routePoints[0].eventStartDate, routePoint.eventStartDate).daysBetween;
@@ -51,4 +51,4 @@ for (const [index, routePoint] of routePoints.entries()) {
     dayEventsList = days.querySelector(`.trip-days__item:last-child .trip-events__list`);
     render(dayEventsList, createRoutePointTemplate(routePoint));
   }
-}
+});

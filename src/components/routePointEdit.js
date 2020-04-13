@@ -2,27 +2,25 @@ import {uniqueItems, setDateToDateTimeFormat} from "../utils.js";
 import {eventTypes} from "../const.js";
 
 const generateEventTypeTemplate = (eventName) => {
+  const lowerCaseName = eventName.toLowerCase();
   return (
     `<div class="event__type-item">
-      <input id="event-type-${eventName.toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${eventName.toLowerCase()}">
-      <label class="event__type-label  event__type-label--${eventName.toLowerCase()}" for="event-type-${eventName.toLowerCase()}-1">${eventName}</label>
+      <input id="event-type-${lowerCaseName}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${lowerCaseName}">
+      <label class="event__type-label  event__type-label--${lowerCaseName}" for="event-type-${lowerCaseName}-1">${eventName}</label>
     </div>`
   );
 };
 
 const generateEventTypesListTemplate = (events) => {
   const groups = uniqueItems(events.map((it) => it.type));
-  let result = ``;
-  for (const group of groups) {
-    result += `
-      <fieldset class="event__type-group">
-        <legend class="visually-hidden">${group}</legend>
-        ${events.slice()
-                    .filter((it) => it.type === group)
-                    .map((it) => generateEventTypeTemplate(it.name)).join(`\n`)}
-      </fieldset>`;
-  }
-  return result;
+  return groups.map((group) =>
+    `<fieldset class="event__type-group">
+      <legend class="visually-hidden">${group}</legend>
+      ${events.slice()
+        .filter((it) => it.type === group)
+        .map((it) => generateEventTypeTemplate(it.name)).join(`\n`)}
+    </fieldset>`
+  ).join(`\n`);
 };
 
 const generateOfferTemplate = (offer) => {
@@ -53,11 +51,8 @@ export const createRoutePointEditTemplate = (routePoint) => {
   const eventName = eventType.name;
   const eventAction = eventType.type === `Transfer` ? `to` : `in`;
 
-  const offersTemplate = eventOffers.slice()
-                                    .map((it) => generateOfferTemplate(it)).join(`\n`);
-
-  const picturesTemplate = eventPhotos.slice()
-                                      .map((it) => generatePictureTemplate(it)).join(`\n`);
+  const offersTemplate = eventOffers.map((it) => generateOfferTemplate(it)).join(`\n`);
+  const picturesTemplate = eventPhotos.map((it) => generatePictureTemplate(it)).join(`\n`);
 
   return (
     `

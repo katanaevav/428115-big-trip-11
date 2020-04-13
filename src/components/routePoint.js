@@ -23,7 +23,7 @@ export const createRoutePointTemplate = (routePoint) => {
 
   const {duration} = getDatesDuration(eventStartDate, eventEndDate);
 
-  let offersTemplate = eventOffers.slice()
+  const offersTemplate = eventOffers.slice()
                                   .filter((it) => it.selected === true)
                                   .map((it, i) => i < MAX_OFFERS ? generateOfferTemplate(it) : ``).join(`\n`);
 
