@@ -1,4 +1,4 @@
-import {setDateToHTMLFormat, setDateToHHMMFormat, getDatesDuration} from "../utils.js";
+import {setDateToHTMLFormat, setDateToHHMMFormat, getDatesDuration, createElement} from "../utils.js";
 
 const MAX_OFFERS = 3;
 
@@ -15,7 +15,7 @@ const generateOfferTemplate = (offer) => {
   );
 };
 
-export const createRoutePointTemplate = (routePoint) => {
+const createRoutePointTemplate = (routePoint) => {
   const {eventType, eventDestination, eventStartDate, eventEndDate, eventCoast, eventOffers} = routePoint;
 
   const eventName = eventType.name;
@@ -28,8 +28,7 @@ export const createRoutePointTemplate = (routePoint) => {
                                   .map((it, i) => i < MAX_OFFERS ? generateOfferTemplate(it) : ``).join(`\n`);
 
   return (
-    `
-    <li class="trip-events__item">
+    `<li class="trip-events__item">
       <div class="event">
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${eventName.toLowerCase()}.png" alt="Event type icon">
@@ -61,3 +60,26 @@ export const createRoutePointTemplate = (routePoint) => {
     </li>`
   );
 };
+
+export default class RoutePoint {
+  constructor(routePoint) {
+    this._routePoint = routePoint;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createRoutePointTemplate(this._routePoint);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

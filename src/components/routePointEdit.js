@@ -1,4 +1,4 @@
-import {uniqueItems, setDateToDateTimeFormat} from "../utils.js";
+import {uniqueItems, setDateToDateTimeFormat, createElement} from "../utils.js";
 import {eventTypes} from "../const.js";
 
 const generateEventTypeTemplate = (eventName) => {
@@ -45,7 +45,7 @@ const generatePictureTemplate = (picture) => {
   );
 };
 
-export const createRoutePointEditTemplate = (routePoint) => {
+const createRoutePointEditTemplate = (routePoint) => {
   const {eventType, eventDestination, eventStartDate, eventEndDate, eventCoast, eventOffers, eventDescription, eventPhotos} = routePoint;
 
   const eventName = eventType.name;
@@ -55,8 +55,7 @@ export const createRoutePointEditTemplate = (routePoint) => {
   const picturesTemplate = eventPhotos.map((it) => generatePictureTemplate(it)).join(`\n`);
 
   return (
-    `
-    <li class="trip-events__item">
+    `<li class="trip-events__item">
       <form class="trip-events__item  event  event--edit" action="#" method="post">
         <header class="event__header">
           <div class="event__type-wrapper">
@@ -131,3 +130,26 @@ export const createRoutePointEditTemplate = (routePoint) => {
     </li>`
   );
 };
+
+export default class RoutePoint {
+  constructor(routePoint) {
+    this._routePoint = routePoint;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createRoutePointEditTemplate(this._routePoint);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
