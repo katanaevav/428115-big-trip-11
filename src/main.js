@@ -34,6 +34,11 @@ const renderRoutePoint = (routePointList, routePoint) => {
     routePointList.replaceChild(routePointComponent.getElement(), routePointEditComponent.getElement());
   };
 
+  const onEditFormClose = (evt) => {
+    evt.preventDefault();
+    routePointList.replaceChild(routePointComponent.getElement(), routePointEditComponent.getElement());
+  };
+
   const routePointComponent = new RoutePointComponent(routePoint);
   const rollupButton = routePointComponent.getElement().querySelector(`.event__rollup-btn`);
   rollupButton.addEventListener(`click`, onRollupButtonClick);
@@ -41,6 +46,7 @@ const renderRoutePoint = (routePointList, routePoint) => {
   const routePointEditComponent = new RoutePointEditComponent(routePoint);
   const editForm = routePointEditComponent.getElement().querySelector(`form`);
   editForm.addEventListener(`submit`, onEditFormSubmit);
+  editForm.addEventListener(`reset`, onEditFormClose);
 
   render(routePointList, routePointComponent.getElement(), RenderPosition.BEFOREEND);
 };
