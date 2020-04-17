@@ -1,4 +1,4 @@
-const ROUTE_POINTS_COUNT = 15;
+const ROUTE_POINTS_COUNT = 20;
 
 import RouteInfoComponent from "./components/routeInfo.js";
 import RouteCostComponent from "./components/routeCost.js";
@@ -7,6 +7,7 @@ import FilterComponent from "./components/filter.js";
 import SortingComponent from "./components/sorting.js";
 import RoutePointEditComponent from "./components/routePointEdit.js";
 import RoutePointComponent from "./components/routePoint.js";
+import NoRoutePoints from "./components/noRoutePoints.js";
 import DaysComponent from "./components/days.js";
 import DayComponent from "./components/day.js";
 import {filterNames} from "./mock/filter.js";
@@ -25,18 +26,38 @@ render(tripMenu, new MenuComponent().getElement(), RenderPosition.AFTEREND);
 render(tripControls, new FilterComponent(filterNames).getElement(), RenderPosition.BEFOREEND);
 
 const renderRoutePoint = (routePointList, routePoint) => {
-  const onRollupButtonClick = () => {
+  const colseRoutePointEditForm = () => {
+    routePointList.replaceChild(routePointComponent.getElement(), routePointEditComponent.getElement());
+  };
+
+  const openRoutePointEditForm = () => {
     routePointList.replaceChild(routePointEditComponent.getElement(), routePointComponent.getElement());
+  };
+
+  const onEscKeyDown = (evt) => {
+    const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
+
+    if (isEscKey) {
+      colseRoutePointEditForm();
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    }
+  };
+
+  const onRollupButtonClick = () => {
+    openRoutePointEditForm();
+    document.addEventListener(`keydown`, onEscKeyDown);
   };
 
   const onEditFormSubmit = (evt) => {
     evt.preventDefault();
-    routePointList.replaceChild(routePointComponent.getElement(), routePointEditComponent.getElement());
+    colseRoutePointEditForm();
+    document.removeEventListener(`keydown`, onEscKeyDown);
   };
 
   const onEditFormClose = (evt) => {
     evt.preventDefault();
-    routePointList.replaceChild(routePointComponent.getElement(), routePointEditComponent.getElement());
+    colseRoutePointEditForm();
+    document.removeEventListener(`keydown`, onEscKeyDown);
   };
 
   const routePointComponent = new RoutePointComponent(routePoint);
@@ -58,18 +79,22 @@ const renderRouteTable = (tripEvents, routePoints) => {
   const daysComponent = new DaysComponent();
   render(tripEvents, daysComponent.getElement(), RenderPosition.BEFOREEND);
 
-  let dayNumber = 0;
-  let dayComponent = new DayComponent(dayNumber + 1, routePoints[0].eventStartDate);
-  render(daysComponent.getElement(), dayComponent.getElement(), RenderPosition.BEFOREEND);
+  if (routePoints.length > 0) {
+    let dayNumber = 0;
+    let dayComponent = new DayComponent(dayNumber + 1, routePoints[0].eventStartDate);
+    render(daysComponent.getElement(), dayComponent.getElement(), RenderPosition.BEFOREEND);
 
-  routePoints.forEach((routePoint) => {
-    if (getDatesDuration(routePoints[0].eventStartDate, routePoint.eventStartDate).daysBetween > dayNumber) {
-      dayNumber = getDatesDuration(routePoints[0].eventStartDate, routePoint.eventStartDate).daysBetween;
-      dayComponent = new DayComponent(dayNumber + 1, routePoint.eventStartDate);
-      render(daysComponent.getElement(), dayComponent.getElement(), RenderPosition.BEFOREEND);
-    }
-    renderRoutePoint(dayComponent.getElement().querySelector(`.trip-events__list`), routePoint);
-  });
+    routePoints.forEach((routePoint) => {
+      if (getDatesDuration(routePoints[0].eventStartDate, routePoint.eventStartDate).daysBetween > dayNumber) {
+        dayNumber = getDatesDuration(routePoints[0].eventStartDate, routePoint.eventStartDate).daysBetween;
+        dayComponent = new DayComponent(dayNumber + 1, routePoint.eventStartDate);
+        render(daysComponent.getElement(), dayComponent.getElement(), RenderPosition.BEFOREEND);
+      }
+      renderRoutePoint(dayComponent.getElement().querySelector(`.trip-events__list`), routePoint);
+    });
+  } else {
+    render(daysComponent.getElement(), new NoRoutePoints().getElement(), RenderPosition.BEFOREEND);
+  }
 };
 
 const tripEvents = document.querySelector(`.trip-events`);
