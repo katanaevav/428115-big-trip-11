@@ -4,6 +4,7 @@ const MILLISECONDS_IN_SECUND = 1000;
 const SECUNDS_IN_MINUTE = 60;
 const MINUTES_IN_HOUR = 60;
 const HOURS_IN_DAY = 24;
+const DAYS = 30;
 
 export const RenderPosition = {
   AFTERBEGIN: `afterbegin`,
@@ -57,7 +58,7 @@ export const getRandomNumbers = function (minNumber, maxNumber, count) {
 export const setDateToHTMLFormat = (dateInInt) => {
   const date = new Date(dateInInt);
   return (
-    `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}T${date.getHours()}:${date.getMinutes()}`
+    `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T${date.getHours()}:${date.getMinutes()}`
   );
 };
 
@@ -79,7 +80,7 @@ export const setDateToDateTimeFormat = (dateInInt) => {
   const date = new Date(dateInInt);
   const shortYear = `${date.getFullYear().toString().charAt(2)}${date.getFullYear().toString().charAt(3)}`;
   return (
-    `${setZeroAtStart(date.getDate())}/${setZeroAtStart(date.getMonth())}/${shortYear} ${setZeroAtStart(date.getHours())}:${setZeroAtStart(date.getMinutes())}`
+    `${setZeroAtStart(date.getDate())}/${setZeroAtStart(date.getMonth() + 1)}/${shortYear} ${setZeroAtStart(date.getHours())}:${setZeroAtStart(date.getMinutes())}`
   );
 };
 
@@ -107,7 +108,7 @@ export const getDatesDuration = (date1InInt, date2InInt) => {
 
   return ({
     duration,
-    daysBetween: date2.getDate() - date1.getDate(),
+    daysBetween: (((date2.getMonth() + 1) * DAYS) + date2.getDate()) - (((date1.getMonth() + 1) * DAYS) + date1.getDate()),
     days,
     hours,
     minutes,
