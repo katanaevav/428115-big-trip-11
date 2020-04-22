@@ -1,4 +1,4 @@
-import {setDateToHTMLFormat, setDateToHHMMFormat, getDatesDuration} from "../utils.js";
+import {setDateToHTMLFormat, setDateToHHMMFormat, getDatesDuration} from "../utils/common.js";
 import AbstractComponent from "./abstractComponent.js";
 
 const MAX_OFFERS = 3;
@@ -71,5 +71,10 @@ export default class RoutePoint extends AbstractComponent {
 
   getTemplate() {
     return createRoutePointTemplate(this._routePoint);
+  }
+
+  setRollupButtonClickHandler(handler) {
+    this.getElement().querySelector(`.event__rollup-btn`)
+      .addEventListener(`click`, handler);
   }
 }

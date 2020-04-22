@@ -1,6 +1,5 @@
 import AbstractComponent from "./abstractComponent.js";
-
-import {setDateToHTMLFormat, setDateToMonthDDFormat} from "../utils.js";
+import {setDateToHTMLFormat, setDateToMonthDDFormat} from "../utils/common.js";
 
 const createDayInfoTemplate = (dayNumber, date, hideDates) => {
   let info = `<span class="day__counter">${dayNumber}</span>

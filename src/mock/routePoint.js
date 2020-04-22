@@ -1,4 +1,4 @@
-import {getRandomInt, getRandomBool, getRandomNumbers} from "../utils.js";
+import {getRandomInt, getRandomBool, getRandomNumbers} from "../utils/common.js";
 import {eventTypes} from "../const.js";
 
 const MINUTE = (1000 * 60);

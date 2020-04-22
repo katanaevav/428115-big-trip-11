@@ -1,4 +1,4 @@
-import {uniqueItems, setDateToMonthDDFormat} from "../utils.js";
+import {uniqueItems, setDateToMonthDDFormat} from "../utils/common.js";
 import AbstractComponent from "./abstractComponent.js";
 
 const createRouteInfoTemplate = (routePoints) => {

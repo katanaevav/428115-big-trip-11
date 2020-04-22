@@ -1,4 +1,4 @@
-import {uniqueItems, setDateToDateTimeFormat} from "../utils.js";
+import {uniqueItems, setDateToDateTimeFormat} from "../utils/common.js";
 import {eventTypes} from "../const.js";
 import AbstractComponent from "./abstractComponent.js";
 
@@ -141,5 +141,15 @@ export default class RoutePoint extends AbstractComponent {
 
   getTemplate() {
     return createRoutePointEditTemplate(this._routePoint);
+  }
+
+  setSubmitHandler(handler) {
+    this.getElement().querySelector(`form`)
+      .addEventListener(`submit`, handler);
+  }
+
+  setResetHandler(handler) {
+    this.getElement().querySelector(`form`)
+      .addEventListener(`reset`, handler);
   }
 }
