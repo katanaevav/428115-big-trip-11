@@ -35,7 +35,3 @@ export const replace = (newComponent, oldComponent) => {
     parentElement.replaceChild(newElement, oldElement);
   }
 };
-
-export const remove = (element) => {
-  element.remove();
-};
