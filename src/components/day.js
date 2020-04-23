@@ -32,6 +32,6 @@ export default class Day extends AbstractComponent {
   }
 
   getTemplate() {
-    return createDayTemplate(this._dayNumber, this._date);
+    return createDayTemplate(this._dayNumber, this._date, this._hideDates);
   }
 }
