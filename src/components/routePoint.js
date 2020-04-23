@@ -1,4 +1,5 @@
-import {setDateToHTMLFormat, setDateToHHMMFormat, getDatesDuration, createElement} from "../utils.js";
+import {setDateToHTMLFormat, setDateToHHMMFormat, getDatesDuration} from "../utils/common.js";
+import AbstractComponent from "./abstractComponent.js";
 
 const MAX_OFFERS = 3;
 
@@ -61,25 +62,19 @@ const createRoutePointTemplate = (routePoint) => {
   );
 };
 
-export default class RoutePoint {
+export default class RoutePoint extends AbstractComponent {
   constructor(routePoint) {
+    super();
+
     this._routePoint = routePoint;
-    this._element = null;
   }
 
   getTemplate() {
     return createRoutePointTemplate(this._routePoint);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+  setRollupButtonClickHandler(handler) {
+    this.getElement().querySelector(`.event__rollup-btn`)
+      .addEventListener(`click`, handler);
   }
 }

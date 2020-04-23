@@ -1,5 +1,6 @@
-import {uniqueItems, setDateToDateTimeFormat, createElement} from "../utils.js";
+import {uniqueItems, setDateToDateTimeFormat} from "../utils/common.js";
 import {eventTypes} from "../const.js";
+import AbstractComponent from "./abstractComponent.js";
 
 const generateEventTypeTemplate = (eventName) => {
   const lowerCaseName = eventName.toLowerCase();
@@ -131,25 +132,24 @@ const createRoutePointEditTemplate = (routePoint) => {
   );
 };
 
-export default class RoutePoint {
+export default class RoutePoint extends AbstractComponent {
   constructor(routePoint) {
+    super();
+
     this._routePoint = routePoint;
-    this._element = null;
   }
 
   getTemplate() {
     return createRoutePointEditTemplate(this._routePoint);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
+  setSubmitHandler(handler) {
+    this.getElement().querySelector(`form`)
+      .addEventListener(`submit`, handler);
   }
 
-  removeElement() {
-    this._element = null;
+  setResetHandler(handler) {
+    this.getElement().querySelector(`form`)
+      .addEventListener(`reset`, handler);
   }
 }
