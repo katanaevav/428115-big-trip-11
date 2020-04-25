@@ -1,4 +1,4 @@
-import SortingComponent from "../components/sorting.js";
+import SortingComponent, {SortType} from "../components/sorting.js";
 import RoutePointEditComponent from "../components/routePointEdit.js";
 import RoutePointComponent from "../components/routePoint.js";
 import NoRoutePoints from "../components/noRoutePoints.js";
@@ -52,20 +52,33 @@ const renderRoutePoint = (routePointList, routePoint) => {
   render(routePointList, routePointComponent.getElement(), RenderPosition.BEFOREEND);
 };
 
-const renderRouteTable = (tripEvents, routePoints) => {
-  const tripSorting = tripEvents.querySelector(`h2`);
-  render(tripSorting, new SortingComponent().getElement(), RenderPosition.AFTEREND);
+const getSortedRoutePoints = (routePoints, sortType) => {
+  let sortedRoutePoints = [];
+  const showingRoutePoints = routePoints.slice();
 
-  const daysComponent = new DaysComponent();
-  render(tripEvents, daysComponent.getElement(), RenderPosition.BEFOREEND);
+  switch (sortType) {
+    case SortType.EVENT:
+      sortedRoutePoints = showingRoutePoints;
+      break;
+    case SortType.TIME:
+      sortedRoutePoints = showingRoutePoints.sort((a, b) => (b.eventEndDate - b.eventStartDate) - (a.eventEndDate - a.eventStartDate));
+      break;
+    case SortType.PRICE:
+      sortedRoutePoints = showingRoutePoints.sort((a, b) => b.eventCoast - a.eventCoast);
+      break;
+  }
 
+  return sortedRoutePoints.slice();
+};
+
+const renderRoutePoints = (daysComponent, routePoints, sortType) => {
   if (routePoints.length > 0) {
     let dayNumber = 0;
-    let dayComponent = new DayComponent(dayNumber + 1, routePoints[0].eventStartDate);
+    let dayComponent = new DayComponent(dayNumber + 1, routePoints[0].eventStartDate, sortType !== SortType.EVENT);
     render(daysComponent.getElement(), dayComponent.getElement(), RenderPosition.BEFOREEND);
 
     routePoints.forEach((routePoint) => {
-      if (getDatesDuration(routePoints[0].eventStartDate, routePoint.eventStartDate).daysBetween > dayNumber) {
+      if (getDatesDuration(routePoints[0].eventStartDate, routePoint.eventStartDate).daysBetween > dayNumber && sortType === SortType.EVENT) {
         dayNumber = getDatesDuration(routePoints[0].eventStartDate, routePoint.eventStartDate).daysBetween;
         dayComponent = new DayComponent(dayNumber + 1, routePoint.eventStartDate);
         render(daysComponent.getElement(), dayComponent.getElement(), RenderPosition.BEFOREEND);
@@ -77,12 +90,27 @@ const renderRouteTable = (tripEvents, routePoints) => {
   }
 };
 
+
 export default class TripController {
   constructor(container) {
     this._container = container;
+    this._sortComponent = new SortingComponent();
   }
 
   render(routePoints) {
-    renderRouteTable(this._container, routePoints);
+    const tripEvents = this._container;
+    const tripSorting = tripEvents.querySelector(`h2`);
+    render(tripSorting, this._sortComponent.getElement(), RenderPosition.AFTEREND);
+
+    const daysComponent = new DaysComponent();
+    render(tripEvents, daysComponent.getElement(), RenderPosition.BEFOREEND);
+
+    renderRoutePoints(daysComponent, routePoints, SortType.EVENT);
+
+    this._sortComponent.setSortTypeChangeHandler((sortType) => {
+      const sortedRoutePoints = getSortedRoutePoints(routePoints, sortType);
+      daysComponent.getElement().innerHTML = ``;
+      renderRoutePoints(daysComponent, sortedRoutePoints, sortType);
+    });
   }
 }
