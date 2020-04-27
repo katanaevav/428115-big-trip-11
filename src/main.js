@@ -7,15 +7,15 @@ import FilterComponent from "./components/filter.js";
 import {filterNames} from "./mock/filter.js";
 import {RenderPosition, render} from "./utils/render.js";
 import {generateRoutePoints} from "./mock/route-point.js";
-import TripController from "./controllers/route-table.js";
+import TripController from "./controllers/trip.js";
 
-const data = generateRoutePoints(ROUTE_POINTS_COUNT).sort((a, b) => a.eventStartDate - b.eventStartDate);
+const routePoints = generateRoutePoints(ROUTE_POINTS_COUNT).sort((a, b) => a.eventStartDate - b.eventStartDate);
 
 const tripMainElement = document.querySelector(`.trip-main`);
-render(tripMainElement, new RouteInfoComponent(data).getElement(), RenderPosition.AFTERBEGIN);
+render(tripMainElement, new RouteInfoComponent(routePoints).getElement(), RenderPosition.AFTERBEGIN);
 
 const tripInfo = tripMainElement.querySelector(`.trip-info__main`);
-render(tripInfo, new RouteCostComponent(data).getElement(), RenderPosition.AFTEREND);
+render(tripInfo, new RouteCostComponent(routePoints).getElement(), RenderPosition.AFTEREND);
 
 const tripControls = tripMainElement.querySelector(`.trip-controls`);
 const tripMenu = tripControls.querySelector(`h2`);
@@ -25,4 +25,4 @@ render(tripControls, new FilterComponent(filterNames).getElement(), RenderPositi
 const tripEvents = document.querySelector(`.trip-events`);
 
 const tripController = new TripController(tripEvents);
-tripController.render(data);
+tripController.render(routePoints);
