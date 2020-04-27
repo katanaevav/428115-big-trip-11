@@ -1,5 +1,5 @@
 import {uniqueItems, setDateToMonthDDFormat} from "../utils/common.js";
-import AbstractComponent from "./abstractComponent.js";
+import AbstractComponent from "./abstract-component.js";
 
 const createRouteInfoTemplate = (routePoints) => {
   const tripTitles = uniqueItems(routePoints.map((routePoint) => {

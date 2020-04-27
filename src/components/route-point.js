@@ -1,5 +1,5 @@
 import {setDateToHTMLFormat, setDateToHHMMFormat, getDatesDuration} from "../utils/common.js";
-import AbstractComponent from "./abstractComponent.js";
+import AbstractComponent from "./abstract-component.js";
 
 const MAX_OFFERS = 3;
 

@@ -1,13 +1,13 @@
 const ROUTE_POINTS_COUNT = 20;
 
-import RouteInfoComponent from "./components/routeInfo.js";
-import RouteCostComponent from "./components/routeCost.js";
+import RouteInfoComponent from "./components/route-info.js";
+import RouteCostComponent from "./components/route-cost.js";
 import MenuComponent from "./components/menu.js";
 import FilterComponent from "./components/filter.js";
 import {filterNames} from "./mock/filter.js";
 import {RenderPosition, render} from "./utils/render.js";
-import {generateRoutePoints} from "./mock/routePoint.js";
-import TripController from "./controllers/routeTable.js";
+import {generateRoutePoints} from "./mock/route-point.js";
+import TripController from "./controllers/route-table.js";
 
 const data = generateRoutePoints(ROUTE_POINTS_COUNT).sort((a, b) => a.eventStartDate - b.eventStartDate);
 

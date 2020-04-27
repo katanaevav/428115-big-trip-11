@@ -1,6 +1,6 @@
 import {uniqueItems, setDateToDateTimeFormat} from "../utils/common.js";
 import {eventTypes} from "../const.js";
-import AbstractComponent from "./abstractComponent.js";
+import AbstractComponent from "./abstract-component.js";
 
 const generateEventTypeTemplate = (eventName) => {
   const lowerCaseName = eventName.toLowerCase();

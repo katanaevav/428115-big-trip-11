@@ -1,7 +1,7 @@
 import SortingComponent, {SortType} from "../components/sorting.js";
-import RoutePointEditComponent from "../components/routePointEdit.js";
-import RoutePointComponent from "../components/routePoint.js";
-import NoRoutePoints from "../components/noRoutePoints.js";
+import RoutePointEditComponent from "../components/route-point-edit.js";
+import RoutePointComponent from "../components/route-point.js";
+import NoRoutePoints from "../components/no-route-points.js";
 import DaysComponent from "../components/days.js";
 import DayComponent from "../components/day.js";
 import {RenderPosition, render, replace} from "../utils/render.js";
