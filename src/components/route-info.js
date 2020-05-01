@@ -3,7 +3,7 @@ import AbstractComponent from "./abstract-component.js";
 
 const createRouteInfoTemplate = (routePoints) => {
   const tripTitles = uniqueItems(routePoints.map((routePoint) => {
-    return routePoint.eventDestination;
+    return routePoint.eventDestination.name;
   }));
 
   const lastTitleItem = tripTitles.length - 1;
