@@ -1,4 +1,4 @@
-const ROUTE_POINTS_COUNT = 2;
+const ROUTE_POINTS_COUNT = 15;
 
 import RouteInfoComponent from "./components/route-info.js";
 import RouteCostComponent from "./components/route-cost.js";
