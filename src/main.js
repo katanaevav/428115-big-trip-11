@@ -1,4 +1,4 @@
-const ROUTE_POINTS_COUNT = 20;
+const ROUTE_POINTS_COUNT = 2;
 
 import RouteInfoComponent from "./components/route-info.js";
 import RouteCostComponent from "./components/route-cost.js";
@@ -12,15 +12,15 @@ import TripController from "./controllers/trip.js";
 const routePoints = generateRoutePoints(ROUTE_POINTS_COUNT).sort((a, b) => a.eventStartDate - b.eventStartDate);
 
 const tripMainElement = document.querySelector(`.trip-main`);
-render(tripMainElement, new RouteInfoComponent(routePoints).getElement(), RenderPosition.AFTERBEGIN);
+render(tripMainElement, new RouteInfoComponent(routePoints), RenderPosition.AFTERBEGIN);
 
 const tripInfo = tripMainElement.querySelector(`.trip-info__main`);
-render(tripInfo, new RouteCostComponent(routePoints).getElement(), RenderPosition.AFTEREND);
+render(tripInfo, new RouteCostComponent(routePoints), RenderPosition.AFTEREND);
 
 const tripControls = tripMainElement.querySelector(`.trip-controls`);
 const tripMenu = tripControls.querySelector(`h2`);
-render(tripMenu, new MenuComponent().getElement(), RenderPosition.AFTEREND);
-render(tripControls, new FilterComponent(filterNames).getElement(), RenderPosition.BEFOREEND);
+render(tripMenu, new MenuComponent(), RenderPosition.AFTEREND);
+render(tripControls, new FilterComponent(filterNames), RenderPosition.BEFOREEND);
 
 const tripEvents = document.querySelector(`.trip-events`);
 

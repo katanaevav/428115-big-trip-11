@@ -56,7 +56,6 @@ export default class Sorting extends AbstractComponent {
   }
 
   setSortTypeChangeHandler(handler) {
-
     this.getElement().querySelectorAll(`.trip-sort__btn`).forEach((input) => {
       input.addEventListener(`click`, (evt) => {
         const sortType = evt.target.dataset.sortType;

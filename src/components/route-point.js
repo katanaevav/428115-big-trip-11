@@ -17,10 +17,12 @@ const generateOfferTemplate = (offer) => {
 };
 
 const createRoutePointTemplate = (routePoint) => {
-  const {eventType, eventDestination, eventStartDate, eventEndDate, eventCoast, eventOffers} = routePoint;
+  const {eventStartDate, eventEndDate, eventCoast, eventOffers, eventType, eventDestination} = routePoint;
 
   const eventName = eventType.name;
   const eventAction = eventType.type === `Transfer` ? `to` : `in`;
+
+  const destination = eventDestination.name;
 
   const {duration} = getDatesDuration(eventStartDate, eventEndDate);
 
@@ -34,7 +36,7 @@ const createRoutePointTemplate = (routePoint) => {
         <div class="event__type">
           <img class="event__type-icon" width="42" height="42" src="img/icons/${eventName.toLowerCase()}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${eventName} ${eventAction} ${eventDestination}</h3>
+        <h3 class="event__title">${eventName} ${eventAction} ${destination}</h3>
 
         <div class="event__schedule">
           <p class="event__time">
