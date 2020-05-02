@@ -1,4 +1,4 @@
-import {uniqueItems, setDateToDateTimeFormat} from "../utils/common.js";
+import {uniqueItems, setDateToDateTimeFormat, pretextFromEventType} from "../utils/common.js";
 import {eventTypes, destinations} from "../mock/route-point.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
 
@@ -71,7 +71,7 @@ const createRoutePointEditTemplate = (routePoint, options = {}) => {
   const {selectedEventType, selectedEventDestination} = options;
 
   const eventName = selectedEventType.name;
-  const eventAction = selectedEventType.type === `Transfer` ? `to` : `in`;
+  const eventAction = pretextFromEventType(selectedEventType.type); // === `Transfer` ? `to` : `in`;
 
   const offersTemplate = selectedEventType.offers.map((it) =>
     generateOfferTemplate(it,

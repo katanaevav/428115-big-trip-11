@@ -1,4 +1,4 @@
-import {setDateToHTMLFormat, setDateToHHMMFormat, getDatesDuration} from "../utils/common.js";
+import {setDateToHTMLFormat, setDateToHHMMFormat, getDatesDuration, pretextFromEventType} from "../utils/common.js";
 import AbstractComponent from "./abstract-component.js";
 
 const MAX_OFFERS = 3;
@@ -20,7 +20,7 @@ const createRoutePointTemplate = (routePoint) => {
   const {eventStartDate, eventEndDate, eventCoast, eventOffers, eventType, eventDestination} = routePoint;
 
   const eventName = eventType.name;
-  const eventAction = eventType.type === `Transfer` ? `to` : `in`;
+  const eventAction = pretextFromEventType(eventType.type); // === `Transfer` ? `to` : `in`;
 
   const destination = eventDestination.name;
 
