@@ -20,7 +20,7 @@ const createRoutePointTemplate = (routePoint) => {
   const {eventStartDate, eventEndDate, eventCoast, eventOffers, eventType, eventDestination} = routePoint;
 
   const eventName = eventType.name;
-  const eventAction = pretextFromEventType(eventType.type); // === `Transfer` ? `to` : `in`;
+  const eventAction = pretextFromEventType(eventType.type);
 
   const destination = eventDestination.name;
 

@@ -37,7 +37,6 @@ const generatePhotos = (count) => {
    .map(generatePhoto);
 };
 
-// const destinations = [`Amsterdam`, `Geneva`, `Chamonix`, `Saint Petersburg`];
 export const destinations = [
   {
     name: `Amsterdam`,
@@ -165,8 +164,6 @@ export const generateRoutePointStructure = () => {
     eventOffers: generateRouteOptions(),
     eventType: eventTypes[getRandomInt(eventTypes.length)],
     eventDestination: destinations[getRandomInt(destinations.length)],
-    // eventDescription: generateDescription(),
-    // eventPhotos: generatePhotos(getRandomInt(MAX_PHOTOS_COUNT) + 1),
     eventIsFavorite: getRandomInt(3) > 1 ? true : false,
   });
 };

@@ -71,7 +71,7 @@ const createRoutePointEditTemplate = (routePoint, options = {}) => {
   const {selectedEventType, selectedEventDestination} = options;
 
   const eventName = selectedEventType.name;
-  const eventAction = pretextFromEventType(selectedEventType.type); // === `Transfer` ? `to` : `in`;
+  const eventAction = pretextFromEventType(selectedEventType.type);
 
   const offersTemplate = selectedEventType.offers.map((it) =>
     generateOfferTemplate(it,
