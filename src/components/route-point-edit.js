@@ -1,6 +1,6 @@
-import {uniqueItems, setDateToDateTimeFormat} from "../utils/common.js";
-import {eventTypes} from "../const.js";
-import AbstractComponent from "./abstractComponent.js";
+import {uniqueItems, setDateToDateTimeFormat, pretextFromEventType} from "../utils/common.js";
+import {eventTypes, destinations} from "../mock/route-point.js";
+import AbstractSmartComponent from "./abstract-smart-component.js";
 
 const generateEventTypeTemplate = (eventName) => {
   const lowerCaseName = eventName.toLowerCase();
@@ -24,9 +24,9 @@ const generateEventTypesListTemplate = (events) => {
   ).join(`\n`);
 };
 
-const generateOfferTemplate = (offer) => {
-  const {name, key, coast, selected} = offer;
-  const checked = selected ? `checked` : ``;
+const generateOfferTemplate = (offer, selected) => {
+  const {name, key, coast} = offer;
+  const checked = selected > -1 ? `checked` : ``;
 
   return (
     `<div class="event__offer-selector">
@@ -46,14 +46,45 @@ const generatePictureTemplate = (picture) => {
   );
 };
 
-const createRoutePointEditTemplate = (routePoint) => {
-  const {eventType, eventDestination, eventStartDate, eventEndDate, eventCoast, eventOffers, eventDescription, eventPhotos} = routePoint;
+const genetateFavoriteButton = (checked) => {
+  return (
+    `<input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${checked}>
+    <label class="event__favorite-btn" for="event-favorite-1">
+      <span class="visually-hidden">Add to favorite</span>
+      <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
+        <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
+      </svg>
+    </label>`
+  );
+};
 
-  const eventName = eventType.name;
-  const eventAction = eventType.type === `Transfer` ? `to` : `in`;
+const generateRollupButton = () => {
+  return (
+    `<button class="event__rollup-btn" type="button">
+      <span class="visually-hidden">Open event</span>
+    </button>`
+  );
+};
 
-  const offersTemplate = eventOffers.map((it) => generateOfferTemplate(it)).join(`\n`);
-  const picturesTemplate = eventPhotos.map((it) => generatePictureTemplate(it)).join(`\n`);
+const createRoutePointEditTemplate = (routePoint, options = {}) => {
+  const {eventStartDate, eventEndDate, eventCoast, eventOffers, eventIsFavorite} = routePoint;
+  const {selectedEventType, selectedEventDestination} = options;
+
+  const eventName = selectedEventType.name;
+  const eventAction = pretextFromEventType(selectedEventType.type);
+
+  const offersTemplate = selectedEventType.offers.map((it) =>
+    generateOfferTemplate(it,
+        eventOffers.findIndex((selectedOffers) => {
+          return it.name === selectedOffers.name;
+        }))).join(`\n`);
+
+  const picturesTemplate = selectedEventDestination.photos.map((it) => generatePictureTemplate(it)).join(`\n`);
+
+  const destination = selectedEventDestination.name;
+  const description = selectedEventDestination.description;
+
+  const isFavorite = eventIsFavorite ? `checked` : ``;
 
   return (
     `<li class="trip-events__item">
@@ -75,7 +106,7 @@ const createRoutePointEditTemplate = (routePoint) => {
             <label class="event__label  event__type-output" for="event-destination-1">
             ${eventName} ${eventAction}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${eventDestination}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination}" list="destination-list-1">
             <datalist id="destination-list-1">
               <option value="Amsterdam"></option>
               <option value="Geneva"></option>
@@ -106,6 +137,10 @@ const createRoutePointEditTemplate = (routePoint) => {
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
           <button class="event__reset-btn" type="reset">Cancel</button>
+
+          ${genetateFavoriteButton(isFavorite)}
+          ${generateRollupButton()}
+
         </header>
         <section class="event__details">
           <section class="event__section  event__section--offers">
@@ -118,7 +153,7 @@ const createRoutePointEditTemplate = (routePoint) => {
 
           <section class="event__section  event__section--destination">
             <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">${eventDescription}</p>
+            <p class="event__destination-description">${description}</p>
 
             <div class="event__photos-container">
               <div class="event__photos-tape">
@@ -132,24 +167,102 @@ const createRoutePointEditTemplate = (routePoint) => {
   );
 };
 
-export default class RoutePoint extends AbstractComponent {
+export default class RoutePoint extends AbstractSmartComponent {
   constructor(routePoint) {
     super();
 
+    this._eventType = routePoint.eventType;
+    this._eventDestination = routePoint.eventDestination;
     this._routePoint = routePoint;
+    this._submitHandler = null;
+    this._resetHandler = null;
+    this._rollupButtonClickHandler = null;
+    this._favoriteButtonClickHandler = null;
+
+    this._subscribeOnEvents();
+  }
+
+  reset() {
+    const routePoint = this._routePoint;
+
+    this._eventType = routePoint.eventType;
+    this._eventDestination = routePoint.eventDestination;
+
+    this.rerender();
   }
 
   getTemplate() {
-    return createRoutePointEditTemplate(this._routePoint);
+    return createRoutePointEditTemplate(this._routePoint, {
+      selectedEventType: this._eventType,
+      selectedEventDestination: this._eventDestination,
+    });
+  }
+
+  recoveryListeners() {
+    this.setSubmitHandler(this._submitHandler);
+    this.setResetHandler(this._resetHandler);
+    this.setRollupButtonClickHandler(this._rollupButtonClickHandler);
+    this.setFavoriteButtonClickHandler(this._favoriteButtonClickHandler);
+
+    this._subscribeOnEvents();
+  }
+
+  rerender() {
+    super.rerender();
   }
 
   setSubmitHandler(handler) {
     this.getElement().querySelector(`form`)
       .addEventListener(`submit`, handler);
+
+    this._submitHandler = handler;
+  }
+
+  _subscribeOnEvents() {
+    const element = this.getElement();
+
+    element.querySelector(`.event__type-list`)
+      .addEventListener(`click`, (evt) => {
+        if (evt.target.type === `radio`) {
+          const selectedEventType = eventTypes.find((eventType) => {
+            return evt.target.value === eventType.name.toLowerCase();
+          });
+          this._eventType = selectedEventType;
+
+          this.rerender();
+        }
+      });
+
+    element.querySelector(`.event__input--destination`)
+    .addEventListener(`change`, (evt) => {
+      const selectedDestination = destinations.find((destination) => {
+        return evt.target.value === destination.name;
+      });
+      if (selectedDestination) {
+        this._eventDestination = selectedDestination;
+      }
+
+      this.rerender();
+    });
   }
 
   setResetHandler(handler) {
     this.getElement().querySelector(`form`)
       .addEventListener(`reset`, handler);
+
+    this._resetHandler = handler;
+  }
+
+  setRollupButtonClickHandler(handler) {
+    this.getElement().querySelector(`.event__rollup-btn`)
+      .addEventListener(`click`, handler);
+    this._rollupButtonClickHandler = handler;
+  }
+
+  setFavoriteButtonClickHandler(handler) {
+    this.getElement().querySelector(`.event__favorite-btn`)
+      .addEventListener(`click`, handler);
+
+    this._favoriteButtonClickHandler = handler;
   }
 }

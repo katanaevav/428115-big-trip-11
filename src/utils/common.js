@@ -5,14 +5,21 @@ const SECUNDS_IN_MINUTE = 60;
 const MINUTES_IN_HOUR = 60;
 const HOURS_IN_DAY = 24;
 const DAYS = 30;
-
-export const uniqueItems = (arr) => {
-  return Array.from(new Set(arr));
-};
+const EVENT_TYPE_TRANSFER = `Transfer`;
+const PRETEXT_TRANSFER = `to`;
+const PRETEXT_ACTIVITY = `in`;
 
 const setZeroAtStart = (number) => {
   const str = number.toString();
   return str.length < 2 ? `0${str}` : str;
+};
+
+export const pretextFromEventType = (eventType) => {
+  return eventType === EVENT_TYPE_TRANSFER ? PRETEXT_TRANSFER : PRETEXT_ACTIVITY;
+};
+
+export const uniqueItems = (arr) => {
+  return Array.from(new Set(arr));
 };
 
 export const getRandomBool = () => {
