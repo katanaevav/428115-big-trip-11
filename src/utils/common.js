@@ -54,19 +54,15 @@ export const getDatesDuration = (date1InInt, date2InInt) => {
   const startDate = moment(date1InInt);
   const endDate = moment(date2InInt);
 
-  let duration = ``;
-
   const days = moment.duration(endDate.diff(startDate)).days();
   const hours = moment.duration(endDate.diff(startDate)).hours();
   const minutes = moment.duration(endDate.diff(startDate)).minutes();
 
-  duration = `${days > 0 ? `${setZeroAtStart(days)}D` : ``} ${hours > 0 ? `${setZeroAtStart(hours)}H` : ``} ${minutes > 0 ? `${setZeroAtStart(minutes)}M` : ``}`;
-
-  const date1 = new Date(date1InInt);
-  const date2 = new Date(date2InInt);
+  const duration = `${days > 0 ? `${setZeroAtStart(days)}D` : ``} ${hours > 0 ? `${setZeroAtStart(hours)}H` : ``} ${minutes > 0 ? `${setZeroAtStart(minutes)}M` : ``}`;
+  const daysBetween = (((endDate.month() + 1) * DAYS) + endDate.date()) - (((startDate.month() + 1) * DAYS) + startDate.date());
 
   return ({
     duration,
-    daysBetween: (((date2.getMonth() + 1) * DAYS) + date2.getDate()) - (((date1.getMonth() + 1) * DAYS) + date1.getDate()),
+    daysBetween,
   });
 };
