@@ -1,9 +1,5 @@
-import {MONTH_NAMES} from "../const.js";
+import moment from "moment";
 
-const MILLISECONDS_IN_SECUND = 1000;
-const SECUNDS_IN_MINUTE = 60;
-const MINUTES_IN_HOUR = 60;
-const HOURS_IN_DAY = 24;
 const DAYS = 30;
 const EVENT_TYPE_TRANSFER = `Transfer`;
 const PRETEXT_TRANSFER = `to`;
@@ -43,61 +39,30 @@ export const getRandomNumbers = function (minNumber, maxNumber, count) {
 };
 
 export const setDateToHTMLFormat = (dateInInt) => {
-  const date = new Date(dateInInt);
-  return (
-    `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T${date.getHours()}:${date.getMinutes()}`
-  );
+  return moment(dateInInt).format(`YYYY-MM-DDTHH:mm`);
 };
 
 export const setDateToHHMMFormat = (dateInInt) => {
-  const date = new Date(dateInInt);
-  return (
-    `${setZeroAtStart(date.getHours())}:${setZeroAtStart(date.getMinutes())}`
-  );
+  return moment(dateInInt).format(`HH:mm`);
 };
 
 export const setDateToMonthDDFormat = (dateInInt) => {
-  const date = new Date(dateInInt);
-  return (
-    `${MONTH_NAMES[date.getMonth()]} ${setZeroAtStart(date.getDate())}`
-  );
-};
-
-export const setDateToDateTimeFormat = (dateInInt) => {
-  const date = new Date(dateInInt);
-  const shortYear = `${date.getFullYear().toString().charAt(2)}${date.getFullYear().toString().charAt(3)}`;
-  return (
-    `${setZeroAtStart(date.getDate())}/${setZeroAtStart(date.getMonth() + 1)}/${shortYear} ${setZeroAtStart(date.getHours())}:${setZeroAtStart(date.getMinutes())}`
-  );
+  return moment(dateInInt).format(`MMM DD`);
 };
 
 export const getDatesDuration = (date1InInt, date2InInt) => {
-  const inMinutes = (date2InInt - date1InInt) / MILLISECONDS_IN_SECUND / SECUNDS_IN_MINUTE;
+  const startDate = moment(date1InInt);
+  const endDate = moment(date2InInt);
 
-  const days = Math.floor(inMinutes / MINUTES_IN_HOUR / HOURS_IN_DAY);
-  const hours = Math.floor((inMinutes / 60) - (Math.floor(inMinutes / MINUTES_IN_HOUR / HOURS_IN_DAY) * HOURS_IN_DAY));
-  const minutes = Math.ceil(inMinutes - (Math.floor(inMinutes / MINUTES_IN_HOUR) * MINUTES_IN_HOUR));
+  const days = moment.duration(endDate.diff(startDate)).days();
+  const hours = moment.duration(endDate.diff(startDate)).hours();
+  const minutes = moment.duration(endDate.diff(startDate)).minutes();
 
-  let duration = ``;
-
-  if (days < 1) {
-    if (hours < 1) {
-      duration = `${setZeroAtStart(minutes)}M`;
-    } else {
-      duration = `${setZeroAtStart(hours)}H ${setZeroAtStart(minutes)}M`;
-    }
-  } else {
-    duration = `${setZeroAtStart(days)}D ${setZeroAtStart(hours)}H ${setZeroAtStart(minutes)}M`;
-  }
-
-  const date1 = new Date(date1InInt);
-  const date2 = new Date(date2InInt);
+  const duration = `${days > 0 ? `${setZeroAtStart(days)}D` : ``} ${hours > 0 ? `${setZeroAtStart(hours)}H` : ``} ${minutes > 0 ? `${setZeroAtStart(minutes)}M` : ``}`;
+  const daysBetween = (((endDate.month() + 1) * DAYS) + endDate.date()) - (((startDate.month() + 1) * DAYS) + startDate.date());
 
   return ({
     duration,
-    daysBetween: (((date2.getMonth() + 1) * DAYS) + date2.getDate()) - (((date1.getMonth() + 1) * DAYS) + date1.getDate()),
-    days,
-    hours,
-    minutes,
+    daysBetween,
   });
 };

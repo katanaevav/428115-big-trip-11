@@ -1,6 +1,8 @@
-import {uniqueItems, setDateToDateTimeFormat, pretextFromEventType} from "../utils/common.js";
+import {uniqueItems, pretextFromEventType} from "../utils/common.js";
 import {eventTypes, destinations} from "../mock/route-point.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
+import flatpickr from "flatpickr";
+import "flatpickr/dist/flatpickr.min.css";
 
 const generateEventTypeTemplate = (eventName) => {
   const lowerCaseName = eventName.toLowerCase();
@@ -119,12 +121,12 @@ const createRoutePointEditTemplate = (routePoint, options = {}) => {
             <label class="visually-hidden" for="event-start-time-1">
               From
             </label>
-            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${setDateToDateTimeFormat(eventStartDate)}">
+            <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${eventStartDate}">
             &mdash;
             <label class="visually-hidden" for="event-end-time-1">
               To
             </label>
-            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${setDateToDateTimeFormat(eventEndDate)}">
+            <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${eventEndDate}">
           </div>
 
           <div class="event__field-group  event__field-group--price">
@@ -178,7 +180,10 @@ export default class RoutePoint extends AbstractSmartComponent {
     this._resetHandler = null;
     this._rollupButtonClickHandler = null;
     this._favoriteButtonClickHandler = null;
+    this._flatpickrStart = null;
+    this._flatpickrEnd = null;
 
+    this._applyFlatpickr();
     this._subscribeOnEvents();
   }
 
@@ -209,6 +214,7 @@ export default class RoutePoint extends AbstractSmartComponent {
 
   rerender() {
     super.rerender();
+    this._applyFlatpickr();
   }
 
   setSubmitHandler(handler) {
@@ -216,6 +222,48 @@ export default class RoutePoint extends AbstractSmartComponent {
       .addEventListener(`submit`, handler);
 
     this._submitHandler = handler;
+  }
+
+  _applyFlatpickr() {
+    if (this._flatpickrStart) {
+      this._flatpickrStart.destroy();
+      this._flatpickrStart = null;
+    }
+
+    if (this._flatpickrEnd) {
+      this._flatpickrEnd.destroy();
+      this._flatpickrEnd = null;
+    }
+
+    let startDate = this._routePoint.eventStartDate;
+
+    const endDateElement = this.getElement().querySelector(`#event-end-time-1`);
+    this._flatpickrEnd = flatpickr(endDateElement, {
+      enableTime: true,
+      altFormat: `d/m/y H:i`,
+      altInput: true,
+      allowInput: true,
+      // eslint-disable-next-line
+      time_24hr: true,
+      defaultDate: this._routePoint.eventEndDate || `today`,
+      onOpen() {
+        this.set(`minDate`, startDate);
+      }
+    });
+
+    const startDateElement = this.getElement().querySelector(`#event-start-time-1`);
+    this._flatpickrStart = flatpickr(startDateElement, {
+      enableTime: true,
+      altFormat: `d/m/y H:i`,
+      altInput: true,
+      allowInput: true,
+      // eslint-disable-next-line
+      time_24hr: true,
+      defaultDate: startDate || `today`,
+      onChange(selectedDates, dateStr) {
+        startDate = dateStr;
+      },
+    });
   }
 
   _subscribeOnEvents() {
