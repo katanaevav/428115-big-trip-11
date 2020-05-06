@@ -45,8 +45,8 @@ const renderRoutePoints = (daysComponent, routePoints, sortType, onDataChange, o
 
 
 export default class TripController {
-  constructor(container) {
-    this._routePoints = [];
+  constructor(container, routePointsModel) {
+    this._routePointsModel = routePointsModel;
     this._showedRoutePointControllers = [];
     this._container = container;
     this._sortComponent = new SortingComponent();
@@ -59,12 +59,12 @@ export default class TripController {
     this._sortComponent.setSortTypeChangeHandler(this._onSortTypeChange);
   }
 
-  render(routePoints) {
-    this._routePoints = routePoints;
+  render() {
     const tripEvents = this._container;
     const tripSorting = tripEvents.querySelector(`h2`);
     render(tripSorting, this._sortComponent, RenderPosition.AFTEREND);
     render(tripEvents, this._daysComponent, RenderPosition.BEFOREEND);
+    const routePoints = this._routePointsModel.getRoutePoints();
 
     if (routePoints.length <= 0) {
       render(this._daysComponent.getElement(), new NoRoutePoints(), RenderPosition.BEFOREEND);
@@ -76,15 +76,11 @@ export default class TripController {
   }
 
   _onDataChange(pointController, oldData, newData) {
-    const index = this._routePoints.findIndex((routePoint) => routePoint === oldData);
+    const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, newData);
 
-    if (index === -1) {
-      return;
+    if (isSuccess) {
+      pointController.render(newData);
     }
-
-    this._routePoints = [].concat(this._routePoints.slice(0, index), newData, this._routePoints.slice(index + 1));
-
-    pointController.render(this._routePoints[index]);
   }
 
   _onViewChange() {
@@ -92,7 +88,7 @@ export default class TripController {
   }
 
   _onSortTypeChange(sortType) {
-    const sortedRoutePoints = getSortedRoutePoints(this._routePoints, sortType);
+    const sortedRoutePoints = getSortedRoutePoints(this._routePointsModel.getRoutePoints(), sortType);
     if (sortedRoutePoints <= 0) {
       return;
     }

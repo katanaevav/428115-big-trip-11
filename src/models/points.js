@@ -14,7 +14,7 @@ export default class Points {
     this._callHandlers(this._dataChangeHandlers);
   }
 
-  updateroutePoint(id, routePoint) {
+  updateRoutePoint(id, routePoint) {
     const index = this._routePoints.findIndex((it) => it.id === id);
 
     if (index === -1) {

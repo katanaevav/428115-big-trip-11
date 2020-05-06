@@ -8,8 +8,12 @@ import {filterNames} from "./mock/filter.js";
 import {RenderPosition, render} from "./utils/render.js";
 import {generateRoutePoints} from "./mock/route-point.js";
 import TripController from "./controllers/trip.js";
+import RoutePointsModel from "./models/points.js";
 
 const routePoints = generateRoutePoints(ROUTE_POINTS_COUNT).sort((a, b) => a.eventStartDate - b.eventStartDate);
+
+const routePointsModel = new RoutePointsModel();
+routePointsModel.setRoutePoints(routePoints);
 
 const tripMainElement = document.querySelector(`.trip-main`);
 render(tripMainElement, new RouteInfoComponent(routePoints), RenderPosition.AFTERBEGIN);
@@ -24,5 +28,5 @@ render(tripControls, new FilterComponent(filterNames), RenderPosition.BEFOREEND)
 
 const tripEvents = document.querySelector(`.trip-events`);
 
-const tripController = new TripController(tripEvents);
+const tripController = new TripController(tripEvents, routePointsModel);
 tripController.render(routePoints);
