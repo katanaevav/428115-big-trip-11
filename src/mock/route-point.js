@@ -158,6 +158,7 @@ export const eventTypes = [
 export const generateRoutePointStructure = () => {
   const startDate = Date.now() - (5 * DAY) + (getRandomInt(DAYS) * DAY) + (getRandomInt(HOURS) * HOUR) + (getRandomInt(MINUTES) * MINUTE);
   return ({
+    id: String(new Date() + Math.random()),
     eventStartDate: startDate,
     eventEndDate: startDate + (getRandomInt(HOURS) * HOUR) + (getRandomInt(MINUTES) * MINUTE),
     eventCoast: generateCoast(),
