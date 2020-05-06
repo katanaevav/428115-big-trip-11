@@ -10,6 +10,14 @@ const setZeroAtStart = (number) => {
   return str.length < 2 ? `0${str}` : str;
 };
 
+export const isFutureEvent = (eventStartDate) => {
+  return eventStartDate > Date.now();
+};
+
+export const isPastEvent = (eventEndDate) => {
+  return eventEndDate < Date.now();
+};
+
 export const pretextFromEventType = (eventType) => {
   return eventType === EVENT_TYPE_TRANSFER ? PRETEXT_TRANSFER : PRETEXT_ACTIVITY;
 };

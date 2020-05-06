@@ -1,6 +1,6 @@
 import RoutePointComponent from "../components/route-point.js";
 import RoutePointEditComponent from "../components/route-point-edit.js";
-import {RenderPosition, render, replace} from "../utils/render.js";
+import {RenderPosition, render, remove, replace} from "../utils/render.js";
 
 const Mode = {
   DEFAULT: `default`,
@@ -72,6 +72,12 @@ export default class PointController {
     if (this._mode !== Mode.DEFAULT) {
       this._colseRoutePointEditForm();
     }
+  }
+
+  destroy() {
+    remove(this._routePointComponent);
+    remove(this._routePointEditComponent);
+    document.removeEventListener(`keydown`, this._onEscKeyDown);
   }
 
   _colseRoutePointEditForm() {

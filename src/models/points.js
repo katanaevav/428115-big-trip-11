@@ -1,17 +1,31 @@
+import {getRoutePointsByFilter} from "../utils/filter.js";
+import {FilterType} from "../const.js";
+
 export default class Points {
   constructor() {
     this._routePoints = [];
+    this._activeFilterType = FilterType.ALL;
 
     this._dataChangeHandlers = [];
+    this._filterChangeHandlers = [];
   }
 
   getRoutePoints() {
+    return getRoutePointsByFilter(this._routePoints, this._activeFilterType);
+  }
+
+  getRoutePointsAll() {
     return this._routePoints;
   }
 
   setRoutePoints(routePoints) {
     this._routePoints = Array.from(routePoints);
     this._callHandlers(this._dataChangeHandlers);
+  }
+
+  setFilter(filterType) {
+    this._activeFilterType = filterType;
+    this._callHandlers(this._filterChangeHandlers);
   }
 
   updateRoutePoint(id, routePoint) {
@@ -26,6 +40,10 @@ export default class Points {
     this._callHandlers(this._dataChangeHandlers);
 
     return true;
+  }
+
+  setFilterChangeHandler(handler) {
+    this._filterChangeHandlers.push(handler);
   }
 
   setDataChangeHandler(handler) {
