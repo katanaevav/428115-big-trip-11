@@ -52,7 +52,7 @@ export default class TripController {
     render(tripSorting, this._sortComponent, RenderPosition.AFTEREND);
     render(tripEvents, this._daysComponent, RenderPosition.BEFOREEND);
 
-    this._renderRoutePoints();
+    this._renderRoutePoints(this._routePointsModel.getRoutePoints(), SortType.EVENT);
   }
 
   _renderRoutePointsWithDays(daysComponent, routePoints, sortType, onDataChange, onViewChange) {
@@ -74,15 +74,15 @@ export default class TripController {
     });
   }
 
-  _renderRoutePoints() {
-    const routePoints = this._routePointsModel.getRoutePoints();
+  _renderRoutePoints(routePoints, sortType) {
+    // const routePoints = this._routePointsModel.getRoutePoints();
 
     if (routePoints.length <= 0) {
       render(this._daysComponent.getElement(), new NoRoutePoints(), RenderPosition.BEFOREEND);
       return;
     }
 
-    const newRoutePoints = this._renderRoutePointsWithDays(this._daysComponent, routePoints, SortType.EVENT, this._onDataChange, this._onViewChange);
+    const newRoutePoints = this._renderRoutePointsWithDays(this._daysComponent, routePoints, sortType, this._onDataChange, this._onViewChange);
     this._showedRoutePointControllers = this._showedRoutePointControllers.concat(newRoutePoints);
   }
 
@@ -95,7 +95,7 @@ export default class TripController {
 
   _updateRoutePoints() {
     this._removeRoutePoints();
-    this._renderRoutePoints();
+    this._renderRoutePoints(this._routePointsModel.getRoutePoints(), SortType.EVENT);
   }
 
   _onDataChange(pointController, oldData, newData) {
@@ -112,15 +112,17 @@ export default class TripController {
 
   _onSortTypeChange(sortType) {
     const sortedRoutePoints = getSortedRoutePoints(this._routePointsModel.getRoutePoints(), sortType);
+
     if (sortedRoutePoints <= 0) {
       return;
     }
-    this._daysComponent.getElement().innerHTML = ``;
-    const newRoutePoints = this._renderRoutePointsWithDays(this._daysComponent, sortedRoutePoints, sortType, this._onDataChange, this._onViewChange);
-    this._showedRoutePointControllers = newRoutePoints;
+
+    this._removeRoutePoints();
+    this._renderRoutePoints(sortedRoutePoints, sortType);
   }
 
   _onFilterChange() {
     this._updateRoutePoints();
+    this._sortComponent.setStartingSortPosition();
   }
 }

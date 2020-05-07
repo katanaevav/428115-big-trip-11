@@ -1,6 +1,7 @@
 import FilterComponent from "../components/filter.js";
 import {FilterType} from "../const.js";
 import {render, replace, RenderPosition} from "../utils/render.js";
+import {getRoutePointsByFilter} from "../utils/filter.js";
 
 export default class FilterController {
   constructor(container, routePointsModel) {
@@ -18,9 +19,11 @@ export default class FilterController {
 
   render() {
     const container = this._container;
+    const allTasks = this._routePointModel.getRoutePointsAll();
     const filters = Object.values(FilterType).map((filterType) => {
       return {
         name: filterType,
+        count: getRoutePointsByFilter(allTasks, filterType).length,
         checked: filterType === this._activeFilterType,
       };
     });
