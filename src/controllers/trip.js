@@ -4,7 +4,7 @@ import DaysComponent from "../components/days.js";
 import DayComponent from "../components/day.js";
 import {RenderPosition, render, remove} from "../utils/render.js";
 import {getDatesDuration} from "../utils/common.js";
-import PointController from "./point.js";
+import PointController, {Mode as RoutePointControllerMode, EmptyRoutePoint} from "./point.js";
 
 const getSortedRoutePoints = (routePoints, sortType) => {
   let sortedRoutePoints = [];
@@ -13,13 +13,13 @@ const getSortedRoutePoints = (routePoints, sortType) => {
 
   switch (sortType) {
     case SortType.EVENT:
-      sortedRoutePoints = showingRoutePoints;
+      sortedRoutePoints = showingRoutePoints.sort((a, b) => parseInt(a.eventStartDate, 10) - parseInt(b.eventStartDate, 10));
       break;
     case SortType.TIME:
-      sortedRoutePoints = showingRoutePoints.sort((a, b) => (b.eventEndDate - b.eventStartDate) - (a.eventEndDate - a.eventStartDate));
+      sortedRoutePoints = showingRoutePoints.sort((a, b) => (parseInt(b.eventEndDate, 10) - parseInt(b.eventStartDate, 10)) - (parseInt(a.eventEndDate, 10) - parseInt(a.eventStartDate, 10)));
       break;
     case SortType.PRICE:
-      sortedRoutePoints = showingRoutePoints.sort((a, b) => b.eventCoast - a.eventCoast);
+      sortedRoutePoints = showingRoutePoints.sort((a, b) => parseInt(b.eventCoast, 10) - parseInt(a.eventCoast, 10));
       break;
   }
 
@@ -27,11 +27,13 @@ const getSortedRoutePoints = (routePoints, sortType) => {
 };
 
 export default class TripController {
-  constructor(container, routePointsModel) {
+  constructor(container, routePointsModel, routeCoast, routeInfo) {
     this._routePointsModel = routePointsModel;
+    this._sortType = SortType.EVENT;
+    this._routeCoast = routeCoast;
+    this._routeInfo = routeInfo;
     this._showedRoutePointControllers = [];
     this._days = [];
-    this._firstEventStartDate = routePointsModel.getRoutePoints()[0].eventStartDate;
 
     this._container = container;
     this._sortComponent = new SortingComponent();
@@ -56,27 +58,27 @@ export default class TripController {
   }
 
   _renderRoutePointsWithDays(daysComponent, routePoints, sortType, onDataChange, onViewChange) {
-    let dayNumber = getDatesDuration(this._firstEventStartDate, routePoints[0].eventStartDate).daysBetween;
+    const firstEventStartDate = (routePoints.map((it) => parseInt(it.eventStartDate, 10)).sort((a, b) => a - b)[0]);
+
+    let dayNumber = getDatesDuration(firstEventStartDate, routePoints[0].eventStartDate).daysBetween;
     let dayComponent = new DayComponent(dayNumber + 1, routePoints[0].eventStartDate, sortType !== SortType.EVENT);
     this._days.push(dayComponent);
     render(daysComponent.getElement(), dayComponent, RenderPosition.BEFOREEND);
 
     return routePoints.map((routePoint) => {
-      if (getDatesDuration(this._firstEventStartDate, routePoint.eventStartDate).daysBetween > dayNumber && sortType === SortType.EVENT) {
-        dayNumber = getDatesDuration(this._firstEventStartDate, routePoint.eventStartDate).daysBetween;
+      if (getDatesDuration(firstEventStartDate, routePoint.eventStartDate).daysBetween > dayNumber && sortType === SortType.EVENT) {
+        dayNumber = getDatesDuration(firstEventStartDate, routePoint.eventStartDate).daysBetween;
         dayComponent = new DayComponent(dayNumber + 1, routePoint.eventStartDate);
         this._days.push(dayComponent);
         render(daysComponent.getElement(), dayComponent, RenderPosition.BEFOREEND);
       }
-      const pointController = new PointController(dayComponent.getElement().querySelector(`.trip-events__list`), onDataChange, onViewChange);
-      pointController.render(routePoint);
-      return pointController;
+      const routePointController = new PointController(dayComponent.getElement().querySelector(`.trip-events__list`), onDataChange, onViewChange);
+      routePointController.render(routePoint, RoutePointControllerMode.DEFAULT);
+      return routePointController;
     });
   }
 
   _renderRoutePoints(routePoints, sortType) {
-    // const routePoints = this._routePointsModel.getRoutePoints();
-
     if (routePoints.length <= 0) {
       render(this._daysComponent.getElement(), new NoRoutePoints(), RenderPosition.BEFOREEND);
       return;
@@ -93,17 +95,35 @@ export default class TripController {
     this._days = [];
   }
 
-  _updateRoutePoints() {
+  _updateRoutePoints(sortType = SortType.EVENT) {
     this._removeRoutePoints();
-    this._renderRoutePoints(this._routePointsModel.getRoutePoints(), SortType.EVENT);
+    this._renderRoutePoints(this._routePointsModel.getRoutePoints(), sortType);
   }
 
-  _onDataChange(pointController, oldData, newData) {
-    const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, newData);
+  _onDataChange(routePointController, oldData, newData) {
+    if (oldData === EmptyRoutePoint) {
+      this._creatingRoutePoint = null;
+      if (newData === null) {
+        routePointController.destroy();
+        this._updateRoutePoints();
+      } else {
+        this._routePointsModel.addRoutePoint(newData);
+        routePointController.render(newData, RoutePointControllerMode.DEFAULT);
 
-    if (isSuccess) {
-      pointController.render(newData);
+        this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
+      }
+    } else if (newData === null) {
+      this._routePointsModel.removeRoutePoint(oldData.id);
+      this._updateRoutePoints(this._sortType);
+    } else {
+      const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, newData);
+      if (isSuccess) {
+        routePointController.render(newData);
+      }
+      this._onSortTypeChange(this._sortType);
     }
+    this._routeCoast.calculate(this._routePointsModel.getRoutePoints());
+    this._routeInfo.generate(this._routePointsModel.getRoutePoints());
   }
 
   _onViewChange() {
@@ -116,6 +136,8 @@ export default class TripController {
     if (sortedRoutePoints <= 0) {
       return;
     }
+
+    this._sortType = sortType;
 
     this._removeRoutePoints();
     this._renderRoutePoints(sortedRoutePoints, sortType);

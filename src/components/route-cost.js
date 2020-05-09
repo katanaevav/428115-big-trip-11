@@ -2,19 +2,18 @@ import AbstractComponent from "./abstract-component.js";
 
 const calculateCoast = (routePoints) => {
   let coast = 0;
+
   routePoints.forEach((routePoint) => {
-    coast += routePoint.eventCoast;
+    coast += parseInt(routePoint.eventCoast, 10);
     routePoint.eventOffers
-        .slice()
-        .filter((eventOffer) => eventOffer.selected)
         .forEach((eventOffer) => {
-          coast += eventOffer.coast;
+          coast += parseInt(eventOffer.coast, 10);
         });
   });
   return coast;
 };
 
-const createRouteCostTemplate = (routePoints) => {
+const createRouteCostTemplate = (routePoints = []) => {
   const coast = calculateCoast(routePoints);
   return (
     `<p class="trip-info__cost">
@@ -24,13 +23,11 @@ const createRouteCostTemplate = (routePoints) => {
 };
 
 export default class RouteCost extends AbstractComponent {
-  constructor(routePoints) {
-    super();
-
-    this._routePoints = routePoints;
+  getTemplate() {
+    return createRouteCostTemplate();
   }
 
-  getTemplate() {
-    return createRouteCostTemplate(this._routePoints);
+  calculate(routePoints) {
+    this.getElement().querySelector(`.trip-info__cost-value`).textContent = calculateCoast(routePoints);
   }
 }

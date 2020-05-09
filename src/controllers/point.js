@@ -2,10 +2,13 @@ import RoutePointComponent from "../components/route-point.js";
 import RoutePointEditComponent from "../components/route-point-edit.js";
 import {RenderPosition, render, remove, replace} from "../utils/render.js";
 
-const Mode = {
+export const Mode = {
   DEFAULT: `default`,
   EDIT: `edit`,
+  ADDING: `add`,
 };
+
+export const EmptyRoutePoint = {};
 
 export default class PointController {
   constructor(container, onDataChange, onViewChange) {
@@ -22,9 +25,10 @@ export default class PointController {
     this._openRoutePointEditForm = this._openRoutePointEditForm.bind(this);
   }
 
-  render(routePoint) {
+  render(routePoint, mode) {
     const oldRoutePointComponent = this._routePointComponent;
     const oldRoutePointEditComponent = this._routePointEditComponent;
+    this._mode = mode;
 
     this._routePointComponent = new RoutePointComponent(routePoint);
     this._routePointEditComponent = new RoutePointEditComponent(routePoint);
@@ -36,14 +40,16 @@ export default class PointController {
 
     this._routePointEditComponent.setSubmitHandler((evt) => {
       evt.preventDefault();
-      this._colseRoutePointEditForm();
+      const data = this._routePointEditComponent.getData();
+      this._onDataChange(this, routePoint, data);
       document.removeEventListener(`keydown`, this._onEscKeyDown);
+      this._colseRoutePointEditForm();
     });
 
     this._routePointEditComponent.setResetHandler((evt) => {
       evt.preventDefault();
-      this._colseRoutePointEditForm();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
+      this._colseRoutePointEditForm();
     });
 
     /* -------------------------Edit form------------------------------------*/
@@ -60,9 +66,12 @@ export default class PointController {
     });
     /* -------------------------Edit form-----------------------------------*/
 
+    this._routePointEditComponent.setDeleteButtonClickHandler(() => this._onDataChange(this, routePoint, null));
+
     if (oldRoutePointComponent && oldRoutePointEditComponent) {
       replace(this._routePointComponent, oldRoutePointComponent);
       replace(this._routePointEditComponent, oldRoutePointEditComponent);
+      document.removeEventListener(`keydown`, this._onEscKeyDown);
     } else {
       render(this._container, this._routePointComponent, RenderPosition.BEFOREEND);
     }
@@ -82,7 +91,9 @@ export default class PointController {
 
   _colseRoutePointEditForm() {
     this._routePointEditComponent.reset();
-    replace(this._routePointComponent, this._routePointEditComponent);
+    if (document.contains(this._routePointEditComponent.getElement())) {
+      replace(this._routePointComponent, this._routePointEditComponent);
+    }
     this._mode = Mode.DEFAULT;
   }
 

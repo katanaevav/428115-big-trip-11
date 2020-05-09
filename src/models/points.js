@@ -28,6 +28,19 @@ export default class Points {
     this._callHandlers(this._filterChangeHandlers);
   }
 
+  removeRoutePoint(id) {
+    const index = this._routePoints.findIndex((it) => it.id === id);
+
+    if (index === -1) {
+      return false;
+    }
+
+    this._routePoints = [].concat(this._routePoints.slice(0, index), this._routePoints.slice(index + 1));
+    this._callHandlers(this._dataChangeHandlers);
+
+    return true;
+  }
+
   updateRoutePoint(id, routePoint) {
     const index = this._routePoints.findIndex((it) => it.id === id);
 
@@ -40,6 +53,11 @@ export default class Points {
     this._callHandlers(this._dataChangeHandlers);
 
     return true;
+  }
+
+  addRoutePoint(routePoint) {
+    this._routePoints = [].concat(routePoint, this._routePoints);
+    this._callHandlers(this._dataChangeHandlers);
   }
 
   setFilterChangeHandler(handler) {

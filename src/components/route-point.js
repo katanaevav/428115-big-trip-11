@@ -26,9 +26,7 @@ const createRoutePointTemplate = (routePoint) => {
 
   const {duration} = getDatesDuration(eventStartDate, eventEndDate);
 
-  const offersTemplate = eventOffers.slice()
-                                  .filter((it) => it.selected === true)
-                                  .map((it, i) => i < MAX_OFFERS ? generateOfferTemplate(it) : ``).join(`\n`);
+  const offersTemplate = eventOffers.map((it, i) => i < MAX_OFFERS ? generateOfferTemplate(it) : ``).join(`\n`);
 
   return (
     `<li class="trip-events__item">

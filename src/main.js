@@ -1,4 +1,4 @@
-const ROUTE_POINTS_COUNT = 10;
+const ROUTE_POINTS_COUNT = 3;
 
 import RouteInfoComponent from "./components/route-info.js";
 import RouteCostComponent from "./components/route-cost.js";
@@ -15,10 +15,14 @@ const routePointsModel = new RoutePointsModel();
 routePointsModel.setRoutePoints(routePoints);
 
 const tripMainElement = document.querySelector(`.trip-main`);
-render(tripMainElement, new RouteInfoComponent(routePoints), RenderPosition.AFTERBEGIN);
+const routeInfo = new RouteInfoComponent();
+routeInfo.generate(routePoints);
+render(tripMainElement, routeInfo, RenderPosition.AFTERBEGIN);
 
 const tripInfo = tripMainElement.querySelector(`.trip-info__main`);
-render(tripInfo, new RouteCostComponent(routePoints), RenderPosition.AFTEREND);
+const routeCoast = new RouteCostComponent();
+routeCoast.calculate(routePoints);
+render(tripInfo, routeCoast, RenderPosition.AFTEREND);
 
 const tripControls = tripMainElement.querySelector(`.trip-controls`);
 const tripMenu = tripControls.querySelector(`h2`);
@@ -29,5 +33,5 @@ filterController.render();
 
 const tripEvents = document.querySelector(`.trip-events`);
 
-const tripController = new TripController(tripEvents, routePointsModel);
+const tripController = new TripController(tripEvents, routePointsModel, routeCoast, routeInfo);
 tripController.render(routePoints);
