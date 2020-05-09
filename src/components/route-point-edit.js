@@ -137,10 +137,17 @@ const generateDetailSection = (selectedEventType, eventOffers, selectedEventDest
   return sectionTemplate;
 };
 
+const generateDestinationTemplate = (destinationName) => {
+  return (
+    `<option value="${destinationName}"></option>`
+  );
+};
 
 const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint) => {
   const {eventStartDate, eventEndDate, eventCoast, eventOffers, eventIsFavorite} = routePoint;
   const {selectedEventType, selectedEventDestination} = options;
+
+  const destinationList = destinations.map((destination) => generateDestinationTemplate(destination.name)).join(`\n`);
 
   const eventName = selectedEventType.name;
   const eventAction = pretextFromEventType(selectedEventType.type);
@@ -171,10 +178,7 @@ const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint)
             </label>
             <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination}" list="destination-list-1">
             <datalist id="destination-list-1">
-              <option value="Amsterdam"></option>
-              <option value="Geneva"></option>
-              <option value="Chamonix"></option>
-              <option value="Saint Petersburg"></option>
+              ${destinationList}
             </datalist>
           </div>
 
