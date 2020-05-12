@@ -100,9 +100,10 @@ export default class TripController {
     if (this._creatingRoutePoint) {
       return;
     }
+
     this._filterController.filterAtStart();
     this._onFilterChange();
-
+    this._showedRoutePointControllers.forEach((it) => it.setDefaultView());
     this._creatingRoutePoint = new PointController(this._daysComponent.getElement(), this._onDataChange, this._onViewChange);
     this._creatingRoutePoint.render(EmptyRoutePoint, RoutePointControllerMode.ADDING);
   }

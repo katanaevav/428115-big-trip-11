@@ -259,7 +259,6 @@ export default class RoutePoint extends AbstractSmartComponent {
     this._flatpickrEnd = null;
     this._deleteButtonClickHandler = null;
 
-    this._applyFlatpickr();
     this._subscribeOnEvents();
   }
 
@@ -307,7 +306,7 @@ export default class RoutePoint extends AbstractSmartComponent {
 
   rerender() {
     super.rerender();
-    this._applyFlatpickr();
+    this.applyFlatpickr();
   }
 
   getData() {
@@ -326,7 +325,7 @@ export default class RoutePoint extends AbstractSmartComponent {
     this._submitHandler = handler;
   }
 
-  _applyFlatpickr() {
+  destroyFlatpickr() {
     if (this._flatpickrStart) {
       this._flatpickrStart.destroy();
       this._flatpickrStart = null;
@@ -336,6 +335,10 @@ export default class RoutePoint extends AbstractSmartComponent {
       this._flatpickrEnd.destroy();
       this._flatpickrEnd = null;
     }
+  }
+
+  applyFlatpickr() {
+    this.destroyFlatpickr();
 
     let startDate = this._routePoint.eventStartDate;
 
@@ -375,20 +378,6 @@ export default class RoutePoint extends AbstractSmartComponent {
         const regExpr = /(^)([#\d]*$)/ig;
         if (!regExpr.test(target.value)) {
           target.setCustomValidity(`Please, input only digits`);
-        } else {
-          target.setCustomValidity(``);
-        }
-      });
-
-    element.querySelector(`.event__input--destination`)
-      .addEventListener(`input`, (evt) => {
-        const target = evt.target;
-        const index = destinations.map((destination) => destination.name).findIndex((it) => {
-          return it === target.value;
-        });
-
-        if (index < 0) {
-          target.setCustomValidity(`Please, select destination from datalist`);
         } else {
           target.setCustomValidity(``);
         }

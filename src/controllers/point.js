@@ -101,6 +101,7 @@ export default class PointController {
         }
         document.addEventListener(`keydown`, this._onEscKeyDown);
         render(this._container, this._routePointEditComponent, RenderPosition.AFTERBEGIN);
+        this._routePointEditComponent.applyFlatpickr();
         break;
     }
   }
@@ -123,12 +124,14 @@ export default class PointController {
       replace(this._routePointComponent, this._routePointEditComponent);
     }
     this._mode = Mode.DEFAULT;
+    this._routePointEditComponent.destroyFlatpickr();
   }
 
   _openRoutePointEditForm() {
     replace(this._routePointEditComponent, this._routePointComponent);
     this._onViewChange();
     this._mode = Mode.EDIT;
+    this._routePointEditComponent.applyFlatpickr();
   }
 
   _onEscKeyDown(evt) {
