@@ -17,6 +17,10 @@ export default class FilterController {
     this._routePointModel.setDataChangeHandler(this._onDataChange);
   }
 
+  filterAtStart() {
+    this._filterComponent.setStartingFilterPosition();
+  }
+
   render() {
     const container = this._container;
     const allRoutePoints = this._routePointModel.getRoutePointsAll();

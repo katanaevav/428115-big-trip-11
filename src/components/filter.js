@@ -39,6 +39,10 @@ export default class Filter extends AbstractComponent {
     return createFilterTemplate(this._filters);
   }
 
+  setStartingFilterPosition() {
+    this.getElement().querySelector(`#filter-everything`).click();
+  }
+
   setFilterChangeHandler(handler) {
     this.getElement().addEventListener(`change`, (evt) => {
       const filterName = getFilterNameById(evt.target.id);

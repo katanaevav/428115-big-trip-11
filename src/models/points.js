@@ -49,7 +49,6 @@ export default class Points {
     }
 
     this._routePoints = [].concat(this._routePoints.slice(0, index), routePoint, this._routePoints.slice(index + 1));
-
     this._callHandlers(this._dataChangeHandlers);
 
     return true;

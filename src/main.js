@@ -1,8 +1,10 @@
-const ROUTE_POINTS_COUNT = 3;
+const ROUTE_POINTS_COUNT = 10;
 
 import RouteInfoComponent from "./components/route-info.js";
 import RouteCostComponent from "./components/route-cost.js";
 import MenuComponent from "./components/menu.js";
+import NewPointComponent from "./components/new-point.js";
+import {MenuElement} from "./const.js";
 import FilterController from "./controllers/filter.js";
 import {RenderPosition, render} from "./utils/render.js";
 import {generateRoutePoints} from "./mock/route-point.js";
@@ -26,12 +28,32 @@ render(tripInfo, routeCoast, RenderPosition.AFTEREND);
 
 const tripControls = tripMainElement.querySelector(`.trip-controls`);
 const tripMenu = tripControls.querySelector(`h2`);
-render(tripMenu, new MenuComponent(), RenderPosition.AFTEREND);
+const mainMenu = new MenuComponent();
+mainMenu.setActiveItem(MenuElement.TABLE);
+render(tripMenu, mainMenu, RenderPosition.AFTEREND);
+
+mainMenu.setOnClick((menuItem) => {
+  switch (menuItem) {
+    case MenuElement.TABLE:
+      mainMenu.setActiveItem(MenuElement.TABLE);
+      break;
+    case MenuElement.STATISTICS:
+      mainMenu.setActiveItem(MenuElement.STATISTICS);
+      break;
+  }
+});
 
 const filterController = new FilterController(tripControls, routePointsModel);
 filterController.render();
 
 const tripEvents = document.querySelector(`.trip-events`);
 
-const tripController = new TripController(tripEvents, routePointsModel, routeCoast, routeInfo);
+const tripController = new TripController(tripEvents, routePointsModel, routeCoast, routeInfo, filterController);
 tripController.render(routePoints);
+
+const newPoint = new NewPointComponent();
+render(tripMainElement, newPoint, RenderPosition.BEFOREEND);
+
+newPoint.setOnClick(() => {
+  tripController.createRoutePoint();
+});

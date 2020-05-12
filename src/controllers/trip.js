@@ -27,13 +27,16 @@ const getSortedRoutePoints = (routePoints, sortType) => {
 };
 
 export default class TripController {
-  constructor(container, routePointsModel, routeCoast, routeInfo) {
+  constructor(container, routePointsModel, routeCoast, routeInfo, filterController) {
+    this._filterController = filterController;
     this._routePointsModel = routePointsModel;
     this._sortType = SortType.EVENT;
     this._routeCoast = routeCoast;
     this._routeInfo = routeInfo;
     this._showedRoutePointControllers = [];
     this._days = [];
+    this._creatingRoutePoint = null;
+    this._noRoutePoints = null;
 
     this._container = container;
     this._sortComponent = new SortingComponent();
@@ -58,7 +61,7 @@ export default class TripController {
   }
 
   _renderRoutePointsWithDays(daysComponent, routePoints, sortType, onDataChange, onViewChange) {
-    const firstEventStartDate = (routePoints.map((it) => parseInt(it.eventStartDate, 10)).sort((a, b) => a - b)[0]);
+    const firstEventStartDate = (this._routePointsModel.getRoutePointsAll().map((it) => parseInt(it.eventStartDate, 10)).sort((a, b) => a - b)[0]);
 
     let dayNumber = getDatesDuration(firstEventStartDate, routePoints[0].eventStartDate).daysBetween;
     let dayComponent = new DayComponent(dayNumber + 1, routePoints[0].eventStartDate, sortType !== SortType.EVENT);
@@ -79,13 +82,29 @@ export default class TripController {
   }
 
   _renderRoutePoints(routePoints, sortType) {
+    if (this._noRoutePoints) {
+      remove(this._noRoutePoints);
+    }
+
     if (routePoints.length <= 0) {
-      render(this._daysComponent.getElement(), new NoRoutePoints(), RenderPosition.BEFOREEND);
+      this._noRoutePoints = new NoRoutePoints();
+      render(this._daysComponent.getElement(), this._noRoutePoints, RenderPosition.BEFOREEND);
       return;
     }
 
     const newRoutePoints = this._renderRoutePointsWithDays(this._daysComponent, routePoints, sortType, this._onDataChange, this._onViewChange);
     this._showedRoutePointControllers = this._showedRoutePointControllers.concat(newRoutePoints);
+  }
+
+  createRoutePoint() {
+    if (this._creatingRoutePoint) {
+      return;
+    }
+    this._filterController.filterAtStart();
+    this._onFilterChange();
+
+    this._creatingRoutePoint = new PointController(this._daysComponent.getElement(), this._onDataChange, this._onViewChange);
+    this._creatingRoutePoint.render(EmptyRoutePoint, RoutePointControllerMode.ADDING);
   }
 
   _removeRoutePoints() {
@@ -109,25 +128,33 @@ export default class TripController {
       } else {
         this._routePointsModel.addRoutePoint(newData);
         routePointController.render(newData, RoutePointControllerMode.DEFAULT);
-
         this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
+        this._onFilterChange();
       }
     } else if (newData === null) {
+
       this._routePointsModel.removeRoutePoint(oldData.id);
       this._updateRoutePoints(this._sortType);
     } else {
+
       const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, newData);
       if (isSuccess) {
         routePointController.render(newData);
+
+        this._onSortTypeChange(this._sortType);
       }
-      this._onSortTypeChange(this._sortType);
     }
+
     this._routeCoast.calculate(this._routePointsModel.getRoutePoints());
     this._routeInfo.generate(this._routePointsModel.getRoutePoints());
   }
 
   _onViewChange() {
     this._showedRoutePointControllers.forEach((it) => it.setDefaultView());
+    if (this._creatingRoutePoint) {
+      this._creatingRoutePoint.destroy();
+      this._creatingRoutePoint = null;
+    }
   }
 
   _onSortTypeChange(sortType) {
@@ -144,7 +171,7 @@ export default class TripController {
   }
 
   _onFilterChange() {
-    this._updateRoutePoints();
     this._sortComponent.setStartingSortPosition();
+    this._onSortTypeChange(SortType.EVENT);
   }
 }

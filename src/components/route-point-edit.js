@@ -244,13 +244,13 @@ const parseFormData = (formData, eventTypeData) => {
 };
 
 export default class RoutePoint extends AbstractSmartComponent {
-  constructor(routePoint) {
+  constructor(routePoint, isNew = false) {
     super();
 
     this._eventType = routePoint.eventType;
     this._eventDestination = routePoint.eventDestination;
     this._routePoint = routePoint;
-    this._isNewRoutePoint = routePoint === null;
+    this._isNewRoutePoint = isNew;
     this._submitHandler = null;
     this._resetHandler = null;
     this._rollupButtonClickHandler = null;
@@ -344,7 +344,6 @@ export default class RoutePoint extends AbstractSmartComponent {
       enableTime: true,
       altFormat: `d/m/y H:i`,
       altInput: true,
-      allowInput: true,
       // eslint-disable-next-line
       time_24hr: true,
       defaultDate: this._routePoint.eventEndDate || `today`,
@@ -358,7 +357,6 @@ export default class RoutePoint extends AbstractSmartComponent {
       enableTime: true,
       altFormat: `d/m/y H:i`,
       altInput: true,
-      allowInput: true,
       // eslint-disable-next-line
       time_24hr: true,
       defaultDate: startDate || `today`,
@@ -370,6 +368,51 @@ export default class RoutePoint extends AbstractSmartComponent {
 
   _subscribeOnEvents() {
     const element = this.getElement();
+
+    element.querySelector(`.event__input--price`)
+      .addEventListener(`input`, (evt) => {
+        const target = evt.target;
+        const regExpr = /(^)([#\d]*$)/ig;
+        if (!regExpr.test(target.value)) {
+          target.setCustomValidity(`Please, input only digits`);
+        } else {
+          target.setCustomValidity(``);
+        }
+      });
+
+    element.querySelector(`.event__input--destination`)
+      .addEventListener(`input`, (evt) => {
+        const target = evt.target;
+        const index = destinations.map((destination) => destination.name).findIndex((it) => {
+          return it === target.value;
+        });
+
+        if (index < 0) {
+          target.setCustomValidity(`Please, select destination from datalist`);
+        } else {
+          target.setCustomValidity(``);
+        }
+      });
+
+    element.querySelector(`#event-start-time-1`)
+      .addEventListener(`input`, (evt) => {
+        const target = evt.target;
+        const endDateElement = element.querySelector(`#event-end-time-1`);
+
+        if (Date.parse(target.value) > Date.parse(endDateElement.value)) {
+          endDateElement.value = target.value;
+        }
+      });
+
+    element.querySelector(`#event-end-time-1`)
+      .addEventListener(`input`, (evt) => {
+        const target = evt.target;
+        const startDateElement = element.querySelector(`#event-start-time-1`);
+
+        if (Date.parse(target.value) < Date.parse(startDateElement.value)) {
+          startDateElement.value = target.value;
+        }
+      });
 
     element.querySelector(`.event__type-list`)
       .addEventListener(`click`, (evt) => {
@@ -416,6 +459,7 @@ export default class RoutePoint extends AbstractSmartComponent {
     }
     this.getElement().querySelector(`.event__rollup-btn`)
       .addEventListener(`click`, handler);
+
     this._rollupButtonClickHandler = handler;
   }
 
