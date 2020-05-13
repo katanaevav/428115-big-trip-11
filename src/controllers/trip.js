@@ -120,7 +120,7 @@ export default class TripController {
     this._renderRoutePoints(this._routePointsModel.getRoutePoints(), sortType);
   }
 
-  _onDataChange(routePointController, oldData, newData) {
+  _onDataChange(routePointController, oldData, newData, updateData = true) {
     if (oldData === EmptyRoutePoint) {
       this._creatingRoutePoint = null;
       if (newData === null) {
@@ -135,14 +135,15 @@ export default class TripController {
     } else if (newData === null) {
 
       this._routePointsModel.removeRoutePoint(oldData.id);
-      this._updateRoutePoints(this._sortType);
+      this._onSortTypeChange(this._sortType);
     } else {
 
       const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, newData);
       if (isSuccess) {
-        routePointController.render(newData);
-
-        this._onSortTypeChange(this._sortType);
+        if (updateData) {
+          routePointController.render(newData);
+          this._onSortTypeChange(this._sortType);
+        }
       }
     }
 

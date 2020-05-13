@@ -74,7 +74,7 @@ export default class PointController {
     this._routePointEditComponent.setFavoriteButtonClickHandler(() => {
       this._onDataChange(this, routePoint, Object.assign({}, routePoint, {
         eventIsFavorite: !routePoint.eventIsFavorite,
-      }));
+      }), false);
     });
 
     this._routePointEditComponent.setDeleteButtonClickHandler((evt) => {
