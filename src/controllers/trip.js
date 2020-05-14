@@ -51,6 +51,14 @@ export default class TripController {
     this._routePointsModel.setFilterChangeHandler(this._onFilterChange);
   }
 
+  hide() {
+    this._container.hide();
+  }
+
+  show() {
+    this._container.show();
+  }
+
   render() {
     const tripEvents = this._container;
     const tripSorting = tripEvents.querySelector(`h2`);
