@@ -1,7 +1,7 @@
 import {uniqueItems, setDateToMonthDDFormat} from "../utils/common.js";
 import AbstractComponent from "./abstract-component.js";
 
-const createRouteInfoTemplate = (routePoints) => {
+const generateTripTitles = (routePoints) => {
   const tripTitles = uniqueItems(routePoints.map((routePoint) => {
     return routePoint.eventDestination.name;
   }));
@@ -11,15 +11,23 @@ const createRouteInfoTemplate = (routePoints) => {
     tripTitles.splice(1, lastTitleItem - 1, `...`);
   }
 
-  const tripTitle = tripTitles.join(` &nbsp;&mdash;&nbsp; `);
+  return tripTitles.join(`  —  `);
+};
 
+const generateTripDates = (routePoints) => {
   const lastDatesItem = routePoints.length - 1;
   const tripDates = routePoints
     .slice()
     .sort((a, b) => a.eventStartDate - b.eventStartDate)
     .map((date) => setDateToMonthDDFormat(date.eventStartDate));
   tripDates.splice(1, lastDatesItem - 1);
-  const tripDate = tripDates.join(` &nbsp;&mdash;&nbsp; `);
+
+  return tripDates.join(` — `);
+};
+
+const createRouteInfoTemplate = (routePoints = []) => {
+  const tripTitle = generateTripTitles(routePoints);
+  const tripDate = generateTripDates(routePoints);
 
   return (
     `<section class="trip-main__trip-info  trip-info">
@@ -33,13 +41,12 @@ const createRouteInfoTemplate = (routePoints) => {
 };
 
 export default class RouteInfo extends AbstractComponent {
-  constructor(routePoints) {
-    super();
-
-    this._routePoints = routePoints;
+  getTemplate() {
+    return createRouteInfoTemplate();
   }
 
-  getTemplate() {
-    return createRouteInfoTemplate(this._routePoints);
+  generate(routePoints) {
+    this.getElement().querySelector(`.trip-info__title`).textContent = generateTripTitles(routePoints);
+    this.getElement().querySelector(`.trip-info__dates`).textContent = generateTripDates(routePoints);
   }
 }

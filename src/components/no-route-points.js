@@ -10,4 +10,8 @@ export default class NoRoutePoints extends AbstractComponent {
   getTemplate() {
     return createNoRoutePointsTemplate();
   }
+
+  removeElement() {
+    super.removeElement();
+  }
 }

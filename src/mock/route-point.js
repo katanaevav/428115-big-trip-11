@@ -1,4 +1,4 @@
-import {getRandomInt, getRandomBool, getRandomNumbers} from "../utils/common.js";
+import {getRandomInt, getRandomNumbers} from "../utils/common.js";
 
 const MINUTE = (1000 * 60);
 const HOUR = (1000 * 60 * 60);
@@ -70,31 +70,26 @@ const generateRouteOptions = () => {
       name: `Add luggage`,
       key: `luggage`,
       coast: generateCoast(),
-      selected: getRandomBool(),
     },
     {
       name: `Switch to comfort`,
       key: `comfort`,
       coast: generateCoast(),
-      selected: getRandomBool(),
     },
     {
       name: `Add meal`,
       key: `meal`,
       coast: generateCoast(),
-      selected: getRandomBool(),
     },
     {
       name: `Choose seats`,
       key: `seats`,
       coast: generateCoast(),
-      selected: getRandomBool(),
     },
     {
       name: `Travel by train`,
       key: `train`,
       coast: generateCoast(),
-      selected: getRandomBool(),
     },
   ];
 
@@ -158,6 +153,7 @@ export const eventTypes = [
 export const generateRoutePointStructure = () => {
   const startDate = Date.now() - (5 * DAY) + (getRandomInt(DAYS) * DAY) + (getRandomInt(HOURS) * HOUR) + (getRandomInt(MINUTES) * MINUTE);
   return ({
+    id: String(new Date() + Math.random()),
     eventStartDate: startDate,
     eventEndDate: startDate + (getRandomInt(HOURS) * HOUR) + (getRandomInt(MINUTES) * MINUTE),
     eventCoast: generateCoast(),
