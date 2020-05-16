@@ -4,6 +4,8 @@ import Chart from "chart.js";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import moment from "moment";
 
+const BAR_HEIGHT = 55;
+
 const getRoutePointsTypeList = (routePoints) => {
   return uniqueItems(routePoints.map((it) => it.eventType));
 };
@@ -300,7 +302,6 @@ export default class Statistic extends AbstractComponent {
     const transportPoints = this._routePointsTypeList.slice()
                                                .filter((it) => it.type === `Transfer`);
 
-    const BAR_HEIGHT = 55;
     moneyCtx.height = BAR_HEIGHT * allPoints.length + 1;
     transportCtx.height = BAR_HEIGHT * transportPoints.length + 1;
     timeSpendCtx.height = BAR_HEIGHT * allPoints.length + 1;
