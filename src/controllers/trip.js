@@ -27,12 +27,13 @@ const getSortedRoutePoints = (routePoints, sortType) => {
 };
 
 export default class TripController {
-  constructor(container, routePointsModel, routeCoast, routeInfo, filterController) {
+  constructor(container, routePointsModel, routeCoast, routeInfo, filterController, routeStat) {
     this._filterController = filterController;
     this._routePointsModel = routePointsModel;
     this._sortType = SortType.EVENT;
     this._routeCoast = routeCoast;
     this._routeInfo = routeInfo;
+    this._routeStat = routeStat;
     this._showedRoutePointControllers = [];
     this._days = [];
     this._creatingRoutePoint = null;
@@ -51,8 +52,16 @@ export default class TripController {
     this._routePointsModel.setFilterChangeHandler(this._onFilterChange);
   }
 
+  hide() {
+    this._container.hide();
+  }
+
+  show() {
+    this._container.show();
+  }
+
   render() {
-    const tripEvents = this._container;
+    const tripEvents = this._container.getElement();
     const tripSorting = tripEvents.querySelector(`h2`);
     render(tripSorting, this._sortComponent, RenderPosition.AFTEREND);
     render(tripEvents, this._daysComponent, RenderPosition.BEFOREEND);
@@ -96,6 +105,11 @@ export default class TripController {
     this._showedRoutePointControllers = this._showedRoutePointControllers.concat(newRoutePoints);
   }
 
+  setSortDefault() {
+    this._sortComponent.setStartingSortPosition();
+    this._onSortTypeChange(SortType.EVENT);
+  }
+
   createRoutePoint() {
     if (this._creatingRoutePoint) {
       return;
@@ -135,6 +149,7 @@ export default class TripController {
     } else if (newData === null) {
 
       this._routePointsModel.removeRoutePoint(oldData.id);
+      this._updateRoutePoints(this._sortType);
       this._onSortTypeChange(this._sortType);
     } else {
 
@@ -149,6 +164,7 @@ export default class TripController {
 
     this._routeCoast.calculate(this._routePointsModel.getRoutePoints());
     this._routeInfo.generate(this._routePointsModel.getRoutePoints());
+    this._routeStat.getData(this._routePointsModel.getRoutePoints());
   }
 
   _onViewChange() {

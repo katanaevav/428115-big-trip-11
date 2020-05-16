@@ -235,7 +235,7 @@ const parseFormData = (formData, eventTypeData) => {
     eventDestination: selectedDestination,
     eventStartDate: Date.parse(formData.get(`event-start-time`)),
     eventEndDate: Date.parse(formData.get(`event-end-time`)),
-    eventCoast: formData.get(`event-price`),
+    eventCoast: parseInt(formData.get(`event-price`), 10),
     eventOffers: eventTypeData.offers.slice().filter((offer) => {
       return selectedOffers.includes(offer.key);
     }),

@@ -58,6 +58,10 @@ export const setDateToMonthDDFormat = (dateInInt) => {
   return moment(dateInInt).format(`MMM DD`);
 };
 
+export const generateTextDuration = (days, hours, minutes) => {
+  return `${days > 0 ? `${setZeroAtStart(days)}D` : ``} ${hours > 0 ? `${setZeroAtStart(hours)}H` : ``} ${minutes > 0 ? `${setZeroAtStart(minutes)}M` : ``}`;
+};
+
 export const getDatesDuration = (date1InInt, date2InInt) => {
   const startDate = moment(date1InInt);
   const endDate = moment(date2InInt);
@@ -66,11 +70,10 @@ export const getDatesDuration = (date1InInt, date2InInt) => {
   const hours = moment.duration(endDate.diff(startDate)).hours();
   const minutes = moment.duration(endDate.diff(startDate)).minutes();
 
-  const duration = `${days > 0 ? `${setZeroAtStart(days)}D` : ``} ${hours > 0 ? `${setZeroAtStart(hours)}H` : ``} ${minutes > 0 ? `${setZeroAtStart(minutes)}M` : ``}`;
   const daysBetween = (((endDate.month() + 1) * DAYS) + endDate.date()) - (((startDate.month() + 1) * DAYS) + startDate.date());
 
   return ({
-    duration,
+    duration: generateTextDuration(days, hours, minutes),
     daysBetween,
   });
 };
