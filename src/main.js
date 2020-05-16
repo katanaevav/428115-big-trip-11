@@ -10,6 +10,8 @@ import {RenderPosition, render} from "./utils/render.js";
 import {generateRoutePoints} from "./mock/route-point.js";
 import TripController from "./controllers/trip.js";
 import RoutePointsModel from "./models/points.js";
+import TripComponent from "./components/trip.js";
+import StatisticsComponent from "./components/statistics.js";
 
 const routePoints = generateRoutePoints(ROUTE_POINTS_COUNT).sort((a, b) => a.eventStartDate - b.eventStartDate);
 
@@ -32,23 +34,20 @@ const mainMenu = new MenuComponent();
 mainMenu.setActiveItem(MenuElement.TABLE);
 render(tripMenu, mainMenu, RenderPosition.AFTEREND);
 
-mainMenu.setOnClick((menuItem) => {
-  switch (menuItem) {
-    case MenuElement.TABLE:
-      mainMenu.setActiveItem(MenuElement.TABLE);
-      break;
-    case MenuElement.STATISTICS:
-      mainMenu.setActiveItem(MenuElement.STATISTICS);
-      break;
-  }
-});
-
 const filterController = new FilterController(tripControls, routePointsModel);
 filterController.render();
 
-const tripEvents = document.querySelector(`.trip-events`);
+const tripEvents = document.querySelector(`.page-main .page-body__container`);
 
-const tripController = new TripController(tripEvents, routePointsModel, routeCoast, routeInfo, filterController);
+const statisticsComponent = new StatisticsComponent();
+render(tripEvents, statisticsComponent, RenderPosition.AFTERBEGIN);
+statisticsComponent.getData(routePoints);
+statisticsComponent.hide();
+
+
+const tripComponent = new TripComponent();
+render(tripEvents, tripComponent, RenderPosition.BEFOREEND);
+const tripController = new TripController(tripComponent, routePointsModel, routeCoast, routeInfo, filterController, statisticsComponent);
 tripController.render(routePoints);
 
 const newPoint = new NewPointComponent();
@@ -56,4 +55,24 @@ render(tripMainElement, newPoint, RenderPosition.BEFOREEND);
 
 newPoint.setOnClick(() => {
   tripController.createRoutePoint();
+});
+
+statisticsComponent.hide();
+tripController.show();
+
+mainMenu.setOnClick((menuItem) => {
+  switch (menuItem) {
+    case MenuElement.TABLE:
+      tripController.setSortDefault();
+      mainMenu.setActiveItem(MenuElement.TABLE);
+      statisticsComponent.hide();
+      tripController.show();
+      break;
+    case MenuElement.STATISTICS:
+      tripController.setSortDefault();
+      mainMenu.setActiveItem(MenuElement.STATISTICS);
+      statisticsComponent.show();
+      tripController.hide();
+      break;
+  }
 });
