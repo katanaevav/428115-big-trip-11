@@ -1,7 +1,7 @@
 import RoutePointComponent from "../components/route-point.js";
 import RoutePointEditComponent from "../components/route-point-edit.js";
 import {RenderPosition, render, remove, replace} from "../utils/render.js";
-import {eventTypes, destinations} from "../mock/route-point.js";
+import RoutePointModel from "../models/point.js";
 
 const FIRST_ELEMENT = 0;
 
@@ -11,22 +11,89 @@ export const Mode = {
   ADDING: `adding`,
 };
 
-export const EmptyRoutePoint = {
-  id: Date.now(),
-  eventStartDate: Date.now(),
-  eventEndDate: Date.now(),
-  eventCoast: 0,
-  eventOffers: [],
-  eventType: eventTypes[FIRST_ELEMENT],
-  eventDestination: destinations[FIRST_ELEMENT],
-  eventIsFavorite: false,
+const parseFormData = (formData, eventTypes, destinations) => {
+  let selectedOffers = [];
+  for (let key of formData.keys()) {
+    if (key.startsWith(`event-offer`)) {
+      selectedOffers.push(key.substring(12));
+    }
+  }
+  const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === formData.get(`event-type-data`).toLowerCase());
+  const eventTypeStructure = eventTypes[eventTypeIndex];
+
+  // eventTypeStructure.title = eventTypes[eventTypeIndex].name;
+  // eventTypeStructure.price = eventTypes[eventTypeIndex].coast;
+  // eventTypeStructure.key = eventTypes[eventTypeIndex].key;
+
+  // .map((it) => ({
+  //   title: it.name,
+  //   price: it.coast,
+  //   key: it.key,
+  // }));
+
+  const selectedDestination = destinations.find(((destination) => {
+    return destination.name === formData.get(`event-destination`);
+  }));
+
+  const routePointModel = new RoutePointModel({
+    id: formData.get(`event-id`),
+    eventStartDate: formData.get(`event-start-time`),
+    eventEndDate: formData.get(`event-end-time`),
+    eventCoast: parseInt(formData.get(`event-price`), 10),
+    eventIsFavorite: formData.get(`event-favorite`) === `true`,
+
+    offers: eventTypeStructure.offers.slice().filter((offer) => {
+      return selectedOffers.includes(offer.key);
+    }).map((it) => ({
+      title: it.name,
+      price: it.coast,
+      key: it.key,
+    })),
+
+    eventDestination: selectedDestination,
+    type: formData.get(`event-type-data`),
+  });
+
+  console.log(routePointModel);
+
+  // let selectedOffers = [];
+  // for (let key of formData.keys()) {
+  //   if (key.startsWith(`event-offer`)) {
+  //     selectedOffers.push(key.substring(12));
+  //   }
+  // }
+
+  // const selectedDestination = destinations.find(((destination) => {
+  //   return destination.name === formData.get(`event-destination`);
+  // }));
+
+  // const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === formData.get(`event-type-data`).toLowerCase());
+  // const eventTypeStructure = eventTypes[eventTypeIndex];
+
+  // return new RoutePointModel({
+  //   id: formData.get(`event-id`),
+  //   eventType: formData.get(`event-type-data`), // eventTypeData,
+  //   eventDestination: selectedDestination,
+  //   eventStartDate: Date.parse(formData.get(`event-start-time`)),
+  //   eventEndDate: Date.parse(formData.get(`event-end-time`)),
+  //   eventCoast: parseInt(formData.get(`event-price`), 10),
+
+  //   eventOffers: eventTypeStructure.offers.slice().filter((offer) => {
+  //     return selectedOffers.includes(offer.key);
+  //   }),
+
+  //   eventIsFavorite: formData.get(`event-favorite`) === `true`,
+  // });
 };
 
 export default class PointController {
-  constructor(container, onDataChange, onViewChange) {
+  constructor(container, onDataChange, onViewChange, offersList, destinationsList) {
     this._container = container;
     this._onDataChange = onDataChange;
     this._onViewChange = onViewChange;
+
+    this._offersList = offersList;
+    this._destinationsList = destinationsList;
 
     this._mode = Mode.DEFAULT;
     this._routePointComponent = null;
@@ -37,13 +104,26 @@ export default class PointController {
     this._openRoutePointEditForm = this._openRoutePointEditForm.bind(this);
   }
 
+  static getEmptyRoutePoint(offersList, destinationsList) {
+    return {
+      id: Date.now(),
+      eventStartDate: Date.now(),
+      eventEndDate: Date.now(),
+      eventCoast: 0,
+      eventOffers: [],
+      eventType: offersList[FIRST_ELEMENT].name,
+      eventDestination: destinationsList[FIRST_ELEMENT],
+      eventIsFavorite: false,
+    };
+  }
+
   render(routePoint, mode = Mode.DEFAULT) {
     const oldRoutePointComponent = this._routePointComponent;
     const oldRoutePointEditComponent = this._routePointEditComponent;
     this._mode = mode;
 
-    this._routePointComponent = new RoutePointComponent(routePoint);
-    this._routePointEditComponent = new RoutePointEditComponent(routePoint, this._mode === Mode.ADDING);
+    this._routePointComponent = new RoutePointComponent(routePoint, this._offersList);
+    this._routePointEditComponent = new RoutePointEditComponent(routePoint, this._mode === Mode.ADDING, this._offersList, this._destinationsList);
 
     this._routePointComponent.setRollupButtonClickHandler(() => {
       this._openRoutePointEditForm();
@@ -52,11 +132,16 @@ export default class PointController {
 
     this._routePointEditComponent.setSubmitHandler((evt) => {
       evt.preventDefault();
-      const editedRoutePoint = this._routePointEditComponent.getData();
-      this._onDataChange(this, routePoint, editedRoutePoint);
+      // const editedRoutePoint = this._routePointEditComponent.getData();
+      // this._onDataChange(this, routePoint, editedRoutePoint);
+      // document.removeEventListener(`keydown`, this._onEscKeyDown);
+      // this._colseRoutePointEditForm();
+
+      const formData = this._routePointEditComponent.getData();
+      const data = parseFormData(formData, this._offersList, this._destinationsList);
+      this._onDataChange(this, routePoint, data);
       document.removeEventListener(`keydown`, this._onEscKeyDown);
       this._colseRoutePointEditForm();
-
     });
 
     this._routePointEditComponent.setResetHandler((evt) => {
@@ -72,14 +157,21 @@ export default class PointController {
     });
 
     this._routePointEditComponent.setFavoriteButtonClickHandler(() => {
-      this._onDataChange(this, routePoint, Object.assign({}, routePoint, {
-        eventIsFavorite: !routePoint.eventIsFavorite,
-      }), false);
+      // this._onDataChange(this, routePoint, Object.assign({}, routePoint, {
+      //   eventIsFavorite: !routePoint.eventIsFavorite,
+      // }), false);
+      const newRoutePoint = RoutePointModel.clone(routePoint);
+      newRoutePoint.isFavorite = !newRoutePoint.isFavorite;
+
+      this._onDataChange(this, routePoint, newRoutePoint);
     });
 
     this._routePointEditComponent.setDeleteButtonClickHandler((evt) => {
       evt.preventDefault();
       this._onDataChange(this, routePoint, null);
+      if (mode === Mode.ADDING) {
+        this._onViewChange();
+      }
     });
 
     switch (mode) {
@@ -139,7 +231,7 @@ export default class PointController {
 
     if (isEscKey) {
       if (this._mode === Mode.ADDING) {
-        this._onDataChange(this, EmptyRoutePoint, null);
+        this._onDataChange(this, this.getEmptyRoutePoint(this._offersList, this._destinationsList), null);
       }
       this._colseRoutePointEditForm();
       document.removeEventListener(`keydown`, this._onEscKeyDown);

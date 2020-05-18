@@ -16,11 +16,15 @@ const generateOfferTemplate = (offer) => {
   );
 };
 
-const createRoutePointTemplate = (routePoint) => {
+const createRoutePointTemplate = (routePoint, eventTypes) => {
   const {eventStartDate, eventEndDate, eventCoast, eventOffers, eventType, eventDestination} = routePoint;
 
-  const eventName = eventType.name;
-  const eventAction = pretextFromEventType(eventType.type);
+  // const eventName = eventType.name;
+  const eventName = eventType;
+
+  const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === eventType.toLowerCase());
+  const eventAction = pretextFromEventType(eventTypes[eventTypeIndex].type);
+  // const eventAction = pretextFromEventType(eventType.type);
 
   const destination = eventDestination.name;
 
@@ -63,14 +67,15 @@ const createRoutePointTemplate = (routePoint) => {
 };
 
 export default class RoutePoint extends AbstractComponent {
-  constructor(routePoint) {
+  constructor(routePoint, eventTypes) {
     super();
 
     this._routePoint = routePoint;
+    this._eventTypes = eventTypes;
   }
 
   getTemplate() {
-    return createRoutePointTemplate(this._routePoint);
+    return createRoutePointTemplate(this._routePoint, this._eventTypes);
   }
 
   setRollupButtonClickHandler(handler) {

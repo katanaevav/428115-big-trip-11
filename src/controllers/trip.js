@@ -4,7 +4,7 @@ import DaysComponent from "../components/days.js";
 import DayComponent from "../components/day.js";
 import {RenderPosition, render, remove} from "../utils/render.js";
 import {getDatesDuration} from "../utils/common.js";
-import PointController, {Mode as RoutePointControllerMode, EmptyRoutePoint} from "./point.js";
+import PointController, {Mode as RoutePointControllerMode} from "./point.js";
 
 const getSortedRoutePoints = (routePoints, sortType) => {
   let sortedRoutePoints = [];
@@ -27,7 +27,7 @@ const getSortedRoutePoints = (routePoints, sortType) => {
 };
 
 export default class TripController {
-  constructor(container, routePointsModel, routeCoast, routeInfo, filterController, routeStat) {
+  constructor(container, routePointsModel, routeCoast, routeInfo, filterController, routeStat, offersList, destinationsList, api) {
     this._filterController = filterController;
     this._routePointsModel = routePointsModel;
     this._sortType = SortType.EVENT;
@@ -38,6 +38,10 @@ export default class TripController {
     this._days = [];
     this._creatingRoutePoint = null;
     this._noRoutePoints = null;
+    this._api = api;
+
+    this._offersList = offersList;
+    this._destinationsList = destinationsList;
 
     this._container = container;
     this._sortComponent = new SortingComponent();
@@ -84,7 +88,7 @@ export default class TripController {
         this._days.push(dayComponent);
         render(daysComponent.getElement(), dayComponent, RenderPosition.BEFOREEND);
       }
-      const routePointController = new PointController(dayComponent.getElement().querySelector(`.trip-events__list`), onDataChange, onViewChange);
+      const routePointController = new PointController(dayComponent.getElement().querySelector(`.trip-events__list`), onDataChange, onViewChange, this._offersList, this._destinationsList);
       routePointController.render(routePoint, RoutePointControllerMode.DEFAULT);
       return routePointController;
     });
@@ -118,8 +122,8 @@ export default class TripController {
     this._filterController.filterAtStart();
     this._onFilterChange();
     this._showedRoutePointControllers.forEach((it) => it.setDefaultView());
-    this._creatingRoutePoint = new PointController(this._daysComponent.getElement(), this._onDataChange, this._onViewChange);
-    this._creatingRoutePoint.render(EmptyRoutePoint, RoutePointControllerMode.ADDING);
+    this._creatingRoutePoint = new PointController(this._daysComponent.getElement(), this._onDataChange, this._onViewChange, this._offersList, this._destinationsList);
+    this._creatingRoutePoint.render(PointController.getEmptyRoutePoint(this._offersList, this._destinationsList), RoutePointControllerMode.ADDING);
   }
 
   _removeRoutePoints() {
@@ -135,7 +139,7 @@ export default class TripController {
   }
 
   _onDataChange(routePointController, oldData, newData, updateData = true) {
-    if (oldData === EmptyRoutePoint) {
+    if (oldData === PointController.getEmptyRoutePoint(this._offersList, this._destinationsList)) {
       this._creatingRoutePoint = null;
       if (newData === null) {
         routePointController.destroy();
@@ -144,6 +148,7 @@ export default class TripController {
         this._routePointsModel.addRoutePoint(newData);
         routePointController.render(newData, RoutePointControllerMode.DEFAULT);
         this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
+        this._updateRoutePoints();
         this._onFilterChange();
       }
     } else if (newData === null) {
@@ -153,13 +158,16 @@ export default class TripController {
       this._onSortTypeChange(this._sortType);
     } else {
 
-      const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, newData);
-      if (isSuccess) {
-        if (updateData) {
-          routePointController.render(newData);
-          this._onSortTypeChange(this._sortType);
-        }
-      }
+      this._api.updateRoutePoint(oldData.id, newData)
+        .then((routePointModel) => {
+          const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, routePointModel);
+          if (isSuccess) {
+            if (updateData) {
+              routePointController.render(routePointModel);
+              this._onSortTypeChange(this._sortType);
+            }
+          }
+        });
     }
 
     this._routeCoast.calculate(this._routePointsModel.getRoutePoints());
