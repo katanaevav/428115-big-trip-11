@@ -21,28 +21,23 @@ const parseFormData = (formData, eventTypes, destinations) => {
   const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === formData.get(`event-type-data`).toLowerCase());
   const eventTypeStructure = eventTypes[eventTypeIndex];
 
-  // eventTypeStructure.title = eventTypes[eventTypeIndex].name;
-  // eventTypeStructure.price = eventTypes[eventTypeIndex].coast;
-  // eventTypeStructure.key = eventTypes[eventTypeIndex].key;
-
-  // .map((it) => ({
-  //   title: it.name,
-  //   price: it.coast,
-  //   key: it.key,
-  // }));
-
-  const selectedDestination = destinations.find(((destination) => {
+  let selectedDestination = {};
+  const destinationIndex = destinations.findIndex(((destination) => {
     return destination.name === formData.get(`event-destination`);
   }));
 
-  const routePointModel = new RoutePointModel({
-    id: formData.get(`event-id`),
-    eventStartDate: formData.get(`event-start-time`),
-    eventEndDate: formData.get(`event-end-time`),
-    eventCoast: parseInt(formData.get(`event-price`), 10),
-    eventIsFavorite: formData.get(`event-favorite`) === `true`,
+  selectedDestination.name = destinations[destinationIndex].name;
+  selectedDestination.description = destinations[destinationIndex].description;
+  selectedDestination.pictures = destinations[destinationIndex].photos;
 
-    offers: eventTypeStructure.offers.slice().filter((offer) => {
+  const routePointModel = new RoutePointModel({
+    "id": formData.get(`event-id`),
+    "date_from": (formData.get(`event-start-time`)),
+    "date_to": (formData.get(`event-end-time`)),
+    "base_price": formData.get(`event-price`),
+    "is_favorite": formData.get(`event-favorite`) === `true`,
+
+    "offers": eventTypeStructure.offers.slice().filter((offer) => {
       return selectedOffers.includes(offer.key);
     }).map((it) => ({
       title: it.name,
@@ -50,40 +45,11 @@ const parseFormData = (formData, eventTypes, destinations) => {
       key: it.key,
     })),
 
-    eventDestination: selectedDestination,
-    type: formData.get(`event-type-data`),
+    "destination": selectedDestination,
+    "type": formData.get(`event-type-data`),
   });
 
-  console.log(routePointModel);
-
-  // let selectedOffers = [];
-  // for (let key of formData.keys()) {
-  //   if (key.startsWith(`event-offer`)) {
-  //     selectedOffers.push(key.substring(12));
-  //   }
-  // }
-
-  // const selectedDestination = destinations.find(((destination) => {
-  //   return destination.name === formData.get(`event-destination`);
-  // }));
-
-  // const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === formData.get(`event-type-data`).toLowerCase());
-  // const eventTypeStructure = eventTypes[eventTypeIndex];
-
-  // return new RoutePointModel({
-  //   id: formData.get(`event-id`),
-  //   eventType: formData.get(`event-type-data`), // eventTypeData,
-  //   eventDestination: selectedDestination,
-  //   eventStartDate: Date.parse(formData.get(`event-start-time`)),
-  //   eventEndDate: Date.parse(formData.get(`event-end-time`)),
-  //   eventCoast: parseInt(formData.get(`event-price`), 10),
-
-  //   eventOffers: eventTypeStructure.offers.slice().filter((offer) => {
-  //     return selectedOffers.includes(offer.key);
-  //   }),
-
-  //   eventIsFavorite: formData.get(`event-favorite`) === `true`,
-  // });
+  return routePointModel;
 };
 
 export default class PointController {
@@ -132,10 +98,6 @@ export default class PointController {
 
     this._routePointEditComponent.setSubmitHandler((evt) => {
       evt.preventDefault();
-      // const editedRoutePoint = this._routePointEditComponent.getData();
-      // this._onDataChange(this, routePoint, editedRoutePoint);
-      // document.removeEventListener(`keydown`, this._onEscKeyDown);
-      // this._colseRoutePointEditForm();
 
       const formData = this._routePointEditComponent.getData();
       const data = parseFormData(formData, this._offersList, this._destinationsList);
@@ -157,9 +119,6 @@ export default class PointController {
     });
 
     this._routePointEditComponent.setFavoriteButtonClickHandler(() => {
-      // this._onDataChange(this, routePoint, Object.assign({}, routePoint, {
-      //   eventIsFavorite: !routePoint.eventIsFavorite,
-      // }), false);
       const newRoutePoint = RoutePointModel.clone(routePoint);
       newRoutePoint.isFavorite = !newRoutePoint.isFavorite;
 

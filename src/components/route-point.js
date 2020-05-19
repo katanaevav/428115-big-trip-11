@@ -19,12 +19,10 @@ const generateOfferTemplate = (offer) => {
 const createRoutePointTemplate = (routePoint, eventTypes) => {
   const {eventStartDate, eventEndDate, eventCoast, eventOffers, eventType, eventDestination} = routePoint;
 
-  // const eventName = eventType.name;
   const eventName = eventType;
 
   const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === eventType.toLowerCase());
   const eventAction = pretextFromEventType(eventTypes[eventTypeIndex].type);
-  // const eventAction = pretextFromEventType(eventType.type);
 
   const destination = eventDestination.name;
 

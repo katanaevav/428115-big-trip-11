@@ -138,6 +138,12 @@ export default class TripController {
     this._renderRoutePoints(this._routePointsModel.getRoutePoints(), sortType);
   }
 
+  _updateRouteInfo() {
+    this._routeCoast.calculate(this._routePointsModel.getRoutePoints());
+    this._routeInfo.generate(this._routePointsModel.getRoutePoints());
+    this._routeStat.getData(this._routePointsModel.getRoutePoints(), this._offersList);
+  }
+
   _onDataChange(routePointController, oldData, newData, updateData = true) {
     if (oldData === PointController.getEmptyRoutePoint(this._offersList, this._destinationsList)) {
       this._creatingRoutePoint = null;
@@ -148,7 +154,6 @@ export default class TripController {
         this._routePointsModel.addRoutePoint(newData);
         routePointController.render(newData, RoutePointControllerMode.DEFAULT);
         this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
-        this._updateRoutePoints();
         this._onFilterChange();
       }
     } else if (newData === null) {
@@ -165,14 +170,11 @@ export default class TripController {
             if (updateData) {
               routePointController.render(routePointModel);
               this._onSortTypeChange(this._sortType);
+              this._updateRouteInfo();
             }
           }
         });
     }
-
-    this._routeCoast.calculate(this._routePointsModel.getRoutePoints());
-    this._routeInfo.generate(this._routePointsModel.getRoutePoints());
-    this._routeStat.getData(this._routePointsModel.getRoutePoints());
   }
 
   _onViewChange() {

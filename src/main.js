@@ -1,5 +1,3 @@
-// const ROUTE_POINTS_COUNT = 10;
-
 import API from "./api.js";
 import RouteInfoComponent from "./components/route-info.js";
 import RouteCostComponent from "./components/route-cost.js";
@@ -14,10 +12,9 @@ import TripComponent from "./components/trip.js";
 import StatisticsComponent from "./components/statistics.js";
 
 const AUTHORIZATION = `Basic er883jdzbdw`;
+const END_POINT = `https://11.ecmascript.pages.academy/big-trip`;
 
-// const routePoints = generateRoutePoints(ROUTE_POINTS_COUNT).sort((a, b) => a.eventStartDate - b.eventStartDate);
-
-const api = new API(AUTHORIZATION);
+const api = new API(END_POINT, AUTHORIZATION);
 
 const routePointsModel = new RoutePointsModel();
 
@@ -29,19 +26,10 @@ const routeCoast = new RouteCostComponent();
 const tripControls = tripMainElement.querySelector(`.trip-controls`);
 const tripMenu = tripControls.querySelector(`h2`);
 const mainMenu = new MenuComponent();
-mainMenu.setActiveItem(MenuElement.TABLE);
-render(tripMenu, mainMenu, RenderPosition.AFTEREND);
-
 const filterController = new FilterController(tripControls, routePointsModel);
-filterController.render();
-
 const tripEvents = document.querySelector(`.page-main .page-body__container`);
-
 const statisticsComponent = new StatisticsComponent();
-render(tripEvents, statisticsComponent, RenderPosition.AFTERBEGIN);
-
 const tripComponent = new TripComponent();
-render(tripEvents, tripComponent, RenderPosition.BEFOREEND);
 
 let offersList = [];
 let destinationsList = [];
@@ -49,6 +37,7 @@ let destinationsList = [];
 const generateTripController = (routePoints) => {
   const tripController = new TripController(tripComponent, routePointsModel, routeCoast, routeInfo, filterController, statisticsComponent, offersList, destinationsList, api);
 
+  const startSorditngRoutePoints = routePoints.sort((a, b) => a.eventStartDate - b.eventStartDate);
 
   const newPoint = new NewPointComponent();
   render(tripMainElement, newPoint, RenderPosition.BEFOREEND);
@@ -77,34 +66,39 @@ const generateTripController = (routePoints) => {
     }
   });
 
-  routePointsModel.setRoutePoints(routePoints);
+  routePointsModel.setRoutePoints(startSorditngRoutePoints);
 
-  tripController.render(routePoints);
+  tripController.render(startSorditngRoutePoints);
 
-  routeInfo.generate(routePoints);
+  routeInfo.generate(startSorditngRoutePoints);
   render(tripMainElement, routeInfo, RenderPosition.AFTERBEGIN);
 
-  routeCoast.calculate(routePoints);
+  routeCoast.calculate(startSorditngRoutePoints);
   const tripInfo = tripMainElement.querySelector(`.trip-info__main`);
   render(tripInfo, routeCoast, RenderPosition.AFTEREND);
 
-  statisticsComponent.getData(routePoints, offersList);
+  statisticsComponent.getData(startSorditngRoutePoints, offersList);
   statisticsComponent.hide();
 };
+
+
+mainMenu.setActiveItem(MenuElement.TABLE);
+render(tripMenu, mainMenu, RenderPosition.AFTEREND);
+filterController.render();
+
+render(tripEvents, statisticsComponent, RenderPosition.AFTERBEGIN);
+render(tripEvents, tripComponent, RenderPosition.BEFOREEND);
 
 api.getOffers()
   .then((offers) => {
     offersList = offers;
-    console.log(offersList);
 
     api.getDestinations()
       .then((destinations) => {
         destinationsList = destinations;
-        console.log(destinationsList);
 
         api.getRoutePoints()
             .then((routePoints) => {
-              console.log(routePoints);
               generateTripController(routePoints);
             });
       });

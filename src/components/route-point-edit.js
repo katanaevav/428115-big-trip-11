@@ -1,5 +1,4 @@
 import {uniqueItems, pretextFromEventType} from "../utils/common.js";
-// import {eventTypes, destinations} from "../mock/route-point.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
@@ -157,7 +156,6 @@ const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint,
 
   const destinationList = destinations.map((destination) => generateDestinationTemplate(destination.name)).join(`\n`);
 
-  // const eventName = selectedEventType.name;
   const eventName = selectedEventType;
 
 
@@ -228,37 +226,6 @@ const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint,
     </li>`
   );
 };
-
-// const parseFormData = (formData, eventTypeData, eventTypes, destinations) => {
-//   let selectedOffers = [];
-//   for (let key of formData.keys()) {
-//     if (key.startsWith(`event-offer`)) {
-//       selectedOffers.push(key.substring(12));
-//     }
-//   }
-
-//   const selectedDestination = destinations.find(((destination) => {
-//     return destination.name === formData.get(`event-destination`);
-//   }));
-
-//   const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === eventTypeData.toLowerCase());
-//   const eventTypeStructure = eventTypes[eventTypeIndex];
-
-//   return {
-//     id: formData.get(`event-id`),
-//     eventType: eventTypeData,
-//     eventDestination: selectedDestination,
-//     eventStartDate: Date.parse(formData.get(`event-start-time`)),
-//     eventEndDate: Date.parse(formData.get(`event-end-time`)),
-//     eventCoast: parseInt(formData.get(`event-price`), 10),
-
-//     eventOffers: eventTypeStructure.offers.slice().filter((offer) => {
-//       return selectedOffers.includes(offer.key);
-//     }),
-
-//     eventIsFavorite: formData.get(`event-favorite`) === `true`,
-//   };
-// };
 
 export default class RoutePoint extends AbstractSmartComponent {
   constructor(routePoint, isNew = false, offersList, destinationsList) {
@@ -337,7 +304,6 @@ export default class RoutePoint extends AbstractSmartComponent {
     formData.append(`event-type-data`, this._eventType);
 
     return formData;
-    // return parseFormData(formData, this._offersList, this._destinationsList);
   }
 
   setSubmitHandler(handler) {

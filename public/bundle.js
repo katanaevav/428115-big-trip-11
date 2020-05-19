@@ -25354,6 +25354,89 @@ module.exports = function(module) {
 
 /***/ }),
 
+/***/ "./src/api.js":
+/*!********************!*\
+  !*** ./src/api.js ***!
+  \********************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _models_offer_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./models/offer.js */ "./src/models/offer.js");
+/* harmony import */ var _models_destination_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./models/destination.js */ "./src/models/destination.js");
+/* harmony import */ var _models_point_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./models/point.js */ "./src/models/point.js");
+
+
+
+
+const Method = {
+  GET: `GET`,
+  POST: `POST`,
+  PUT: `PUT`,
+  DELETE: `DELETE`
+};
+
+const checkStatus = (response) => {
+  if (response.status >= 200 && response.status < 300) {
+    return response;
+  } else {
+    throw new Error(`${response.status}: ${response.statusText}`);
+  }
+};
+
+const API = class {
+  constructor(endPoint, authorization) {
+    this._endPoint = endPoint;
+    this._authorization = authorization;
+  }
+
+  getOffers() {
+    return this._load({url: `offers`})
+    .then((response) => response.json())
+    .then(_models_offer_js__WEBPACK_IMPORTED_MODULE_0__["default"].parseOffers);
+  }
+
+  getDestinations() {
+    return this._load({url: `destinations`})
+    .then((response) => response.json())
+    .then(_models_destination_js__WEBPACK_IMPORTED_MODULE_1__["default"].parseDestinations);
+  }
+
+  getRoutePoints() {
+    return this._load({url: `points`})
+    .then((response) => response.json())
+    .then(_models_point_js__WEBPACK_IMPORTED_MODULE_2__["default"].parsePoints);
+  }
+
+  updateRoutePoint(id, data) {
+    return this._load({
+      url: `points/${id}`,
+      method: Method.PUT,
+      body: JSON.stringify(data.toRAW()),
+      headers: new Headers({"Content-Type": `application/json`})
+    })
+      .then((response) => response.json())
+      .then(_models_point_js__WEBPACK_IMPORTED_MODULE_2__["default"].parsePoint);
+
+  }
+
+  _load({url, method = Method.GET, body = null, headers = new Headers()}) {
+    headers.append(`Authorization`, this._authorization);
+
+    return fetch(`${this._endPoint}/${url}`, {method, body, headers})
+      .then(checkStatus)
+      .catch((err) => {
+        throw err;
+      });
+  }
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (API);
+
+
+/***/ }),
+
 /***/ "./src/components/abstract-component.js":
 /*!**********************************************!*\
   !*** ./src/components/abstract-component.js ***!
@@ -25846,13 +25929,11 @@ class RouteInfo extends _abstract_component_js__WEBPACK_IMPORTED_MODULE_1__["def
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return RoutePoint; });
 /* harmony import */ var _utils_common_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/common.js */ "./src/utils/common.js");
-/* harmony import */ var _mock_route_point_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../mock/route-point.js */ "./src/mock/route-point.js");
-/* harmony import */ var _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./abstract-smart-component.js */ "./src/components/abstract-smart-component.js");
-/* harmony import */ var flatpickr__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! flatpickr */ "./node_modules/flatpickr/dist/flatpickr.js");
-/* harmony import */ var flatpickr__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(flatpickr__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var flatpickr_dist_flatpickr_min_css__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! flatpickr/dist/flatpickr.min.css */ "./node_modules/flatpickr/dist/flatpickr.min.css");
-/* harmony import */ var flatpickr_dist_flatpickr_min_css__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(flatpickr_dist_flatpickr_min_css__WEBPACK_IMPORTED_MODULE_4__);
-
+/* harmony import */ var _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./abstract-smart-component.js */ "./src/components/abstract-smart-component.js");
+/* harmony import */ var flatpickr__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! flatpickr */ "./node_modules/flatpickr/dist/flatpickr.js");
+/* harmony import */ var flatpickr__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(flatpickr__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var flatpickr_dist_flatpickr_min_css__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! flatpickr/dist/flatpickr.min.css */ "./node_modules/flatpickr/dist/flatpickr.min.css");
+/* harmony import */ var flatpickr_dist_flatpickr_min_css__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(flatpickr_dist_flatpickr_min_css__WEBPACK_IMPORTED_MODULE_3__);
 
 
 
@@ -25925,32 +26006,40 @@ const generateOfferTemplate = (offer, selected) => {
   );
 };
 
-const genearteOfferSection = (selectedEventType, eventOffers) => {
-  const offersTemplate = selectedEventType.offers.map((it) =>
-    generateOfferTemplate(it,
-        eventOffers.findIndex((selectedOffers) => {
-          return it.name === selectedOffers.name;
-        }))).join(`\n`);
+const genearteOfferSection = (selectedEventType, eventOffers, eventTypes) => {
+  const offerIndex = eventTypes.findIndex((it) => {
+    return it.name.toLowerCase() === selectedEventType.toLowerCase();
+  });
 
   let sectionTemplate = ``;
 
-  if (selectedEventType.offers.length > 0) {
-    sectionTemplate =
-      `<section class="event__section  event__section--offers">
-        <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+  if (offerIndex > -1) {
+    const selectedOffer = eventTypes[offerIndex];
+    const offersTemplate = selectedOffer.offers.map((it) =>
+      generateOfferTemplate(it,
+          eventOffers.findIndex((selectedOffers) => {
+            return it.name === selectedOffers.name;
+          }))).join(`\n`);
 
-        <div class="event__available-offers">
-          ${offersTemplate}
-        </div>
-      </section>`;
+    if (selectedOffer.offers.length > 0) {
+      sectionTemplate =
+        `<section class="event__section  event__section--offers">
+          <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+
+          <div class="event__available-offers">
+            ${offersTemplate}
+          </div>
+        </section>`;
+    }
   }
 
   return sectionTemplate;
 };
 
 const generatePictureTemplate = (picture) => {
+  const {src, descritpion} = picture;
   return (
-    `<img class="event__photo" src="${picture}" alt="Event photo">`
+    `<img class="event__photo" src="${src}" alt="${descritpion}">`
   );
 };
 
@@ -25975,9 +26064,9 @@ const generateDestinationSection = (selectedEventDestination) => {
   return sectionTemplate;
 };
 
-const generateDetailSection = (selectedEventType, eventOffers, selectedEventDestination) => {
+const generateDetailSection = (selectedEventType, eventOffers, selectedEventDestination, eventTypes) => {
   let sectionTemplate = ``;
-  const offer = genearteOfferSection(selectedEventType, eventOffers);
+  const offer = genearteOfferSection(selectedEventType, eventOffers, eventTypes);
   const destination = generateDestinationSection(selectedEventDestination);
 
   if (offer.length > 0 || destination.length > 0) {
@@ -25997,14 +26086,17 @@ const generateDestinationTemplate = (destinationName) => {
   );
 };
 
-const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint) => {
+const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint, eventTypes, destinations) => {
   const {eventStartDate, eventEndDate, eventCoast, eventOffers, eventIsFavorite} = routePoint;
   const {selectedEventType, selectedEventDestination} = options;
 
-  const destinationList = _mock_route_point_js__WEBPACK_IMPORTED_MODULE_1__["destinations"].map((destination) => generateDestinationTemplate(destination.name)).join(`\n`);
+  const destinationList = destinations.map((destination) => generateDestinationTemplate(destination.name)).join(`\n`);
 
-  const eventName = selectedEventType.name;
-  const eventAction = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["pretextFromEventType"])(selectedEventType.type);
+  const eventName = selectedEventType;
+
+
+  const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === selectedEventType.toLowerCase());
+  const eventAction = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["pretextFromEventType"])(eventTypes[eventTypeIndex].type);
 
   const resetButtonCaption = isNewRoutePoint ? ResetButtonCaptions.NEW_ROUTE_POINT : ResetButtonCaptions.EDIT_ROUTE_POINT;
   const destination = selectedEventDestination.name;
@@ -26022,7 +26114,7 @@ const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint)
             <input class="event__type-toggle visually-hidden" id="event-type-toggle-1" type="checkbox">
 
             <div class="event__type-list">
-              ${generateEventTypesListTemplate(_mock_route_point_js__WEBPACK_IMPORTED_MODULE_1__["eventTypes"])}
+              ${generateEventTypesListTemplate(eventTypes)}
             </div>
           </div>
 
@@ -26064,41 +26156,15 @@ const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint)
 
         </header>
 
-        ${generateDetailSection(selectedEventType, eventOffers, selectedEventDestination)}
+        ${generateDetailSection(selectedEventType, eventOffers, selectedEventDestination, eventTypes)}
 
       </form>
     </li>`
   );
 };
 
-const parseFormData = (formData, eventTypeData) => {
-  let selectedOffers = [];
-  for (let key of formData.keys()) {
-    if (key.startsWith(`event-offer`)) {
-      selectedOffers.push(key.substring(12));
-    }
-  }
-
-  const selectedDestination = _mock_route_point_js__WEBPACK_IMPORTED_MODULE_1__["destinations"].find(((destination) => {
-    return destination.name === formData.get(`event-destination`);
-  }));
-
-  return {
-    id: formData.get(`event-id`),
-    eventType: eventTypeData,
-    eventDestination: selectedDestination,
-    eventStartDate: Date.parse(formData.get(`event-start-time`)),
-    eventEndDate: Date.parse(formData.get(`event-end-time`)),
-    eventCoast: parseInt(formData.get(`event-price`), 10),
-    eventOffers: eventTypeData.offers.slice().filter((offer) => {
-      return selectedOffers.includes(offer.key);
-    }),
-    eventIsFavorite: formData.get(`event-favorite`) === `true`,
-  };
-};
-
-class RoutePoint extends _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_2__["default"] {
-  constructor(routePoint, isNew = false) {
+class RoutePoint extends _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_1__["default"] {
+  constructor(routePoint, isNew = false, offersList, destinationsList) {
     super();
 
     this._eventType = routePoint.eventType;
@@ -26113,7 +26179,10 @@ class RoutePoint extends _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_2
     this._flatpickrEnd = null;
     this._deleteButtonClickHandler = null;
 
-    this._subscribeOnEvents();
+    this._offersList = offersList;
+    this._destinationsList = destinationsList;
+
+    this._subscribeOnEvents(this._offersList, this._destinationsList);
   }
 
   reset() {
@@ -26129,7 +26198,7 @@ class RoutePoint extends _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_2
     return createRoutePointEditTemplate(this._routePoint, {
       selectedEventType: this._eventType,
       selectedEventDestination: this._eventDestination,
-    }, this._isNewRoutePoint);
+    }, this._isNewRoutePoint, this._offersList, this._destinationsList);
   }
 
   removeElement() {
@@ -26155,7 +26224,7 @@ class RoutePoint extends _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_2
     }
     this.setDeleteButtonClickHandler(this._deleteButtonClickHandler);
 
-    this._subscribeOnEvents();
+    this._subscribeOnEvents(this._offersList, this._destinationsList);
   }
 
   rerender() {
@@ -26168,8 +26237,9 @@ class RoutePoint extends _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_2
     const formData = new FormData(form);
     formData.append(`event-favorite`, this._routePoint.eventIsFavorite);
     formData.append(`event-id`, this._routePoint.id);
+    formData.append(`event-type-data`, this._eventType);
 
-    return parseFormData(formData, this._eventType);
+    return formData;
   }
 
   setSubmitHandler(handler) {
@@ -26197,7 +26267,7 @@ class RoutePoint extends _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_2
     let startDate = this._routePoint.eventStartDate;
 
     const endDateElement = this.getElement().querySelector(`#event-end-time-1`);
-    this._flatpickrEnd = flatpickr__WEBPACK_IMPORTED_MODULE_3___default()(endDateElement, {
+    this._flatpickrEnd = flatpickr__WEBPACK_IMPORTED_MODULE_2___default()(endDateElement, {
       enableTime: true,
       altFormat: `d/m/y H:i`,
       altInput: true,
@@ -26210,7 +26280,7 @@ class RoutePoint extends _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_2
     });
 
     const startDateElement = this.getElement().querySelector(`#event-start-time-1`);
-    this._flatpickrStart = flatpickr__WEBPACK_IMPORTED_MODULE_3___default()(startDateElement, {
+    this._flatpickrStart = flatpickr__WEBPACK_IMPORTED_MODULE_2___default()(startDateElement, {
       enableTime: true,
       altFormat: `d/m/y H:i`,
       altInput: true,
@@ -26223,7 +26293,7 @@ class RoutePoint extends _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_2
     });
   }
 
-  _subscribeOnEvents() {
+  _subscribeOnEvents(eventTypes, destinations) {
     const element = this.getElement();
 
     element.querySelector(`.event__input--price`)
@@ -26260,10 +26330,11 @@ class RoutePoint extends _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_2
     element.querySelector(`.event__type-list`)
       .addEventListener(`click`, (evt) => {
         if (evt.target.type === `radio`) {
-          const selectedEventType = _mock_route_point_js__WEBPACK_IMPORTED_MODULE_1__["eventTypes"].find((eventType) => {
+          const selectedEventType = eventTypes.find((eventType) => {
             return evt.target.value === eventType.name.toLowerCase();
           });
-          this._eventType = selectedEventType;
+
+          this._eventType = selectedEventType.name.toLowerCase();
 
           this.rerender();
         }
@@ -26271,7 +26342,7 @@ class RoutePoint extends _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_2
 
     element.querySelector(`.event__input--destination`)
     .addEventListener(`change`, (evt) => {
-      const selectedDestination = _mock_route_point_js__WEBPACK_IMPORTED_MODULE_1__["destinations"].find((destination) => {
+      const selectedDestination = destinations.find((destination) => {
         return evt.target.value === destination.name;
       });
       if (selectedDestination) {
@@ -26350,11 +26421,13 @@ const generateOfferTemplate = (offer) => {
   );
 };
 
-const createRoutePointTemplate = (routePoint) => {
+const createRoutePointTemplate = (routePoint, eventTypes) => {
   const {eventStartDate, eventEndDate, eventCoast, eventOffers, eventType, eventDestination} = routePoint;
 
-  const eventName = eventType.name;
-  const eventAction = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["pretextFromEventType"])(eventType.type);
+  const eventName = eventType;
+
+  const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === eventType.toLowerCase());
+  const eventAction = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["pretextFromEventType"])(eventTypes[eventTypeIndex].type);
 
   const destination = eventDestination.name;
 
@@ -26397,14 +26470,15 @@ const createRoutePointTemplate = (routePoint) => {
 };
 
 class RoutePoint extends _abstract_component_js__WEBPACK_IMPORTED_MODULE_1__["default"] {
-  constructor(routePoint) {
+  constructor(routePoint, eventTypes) {
     super();
 
     this._routePoint = routePoint;
+    this._eventTypes = eventTypes;
   }
 
   getTemplate() {
-    return createRoutePointTemplate(this._routePoint);
+    return createRoutePointTemplate(this._routePoint, this._eventTypes);
   }
 
   setRollupButtonClickHandler(handler) {
@@ -26536,25 +26610,28 @@ __webpack_require__.r(__webpack_exports__);
 
 const BAR_HEIGHT = 55;
 
-const getRoutePointsTypeList = (routePoints) => {
-  return Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["uniqueItems"])(routePoints.map((it) => it.eventType));
+const getRoutePointsTypeList = (routePoints, eventTypes) => {
+  return Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["uniqueItems"])(routePoints.map((it) => it.eventType)).map((type) => {
+    const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === type.toLowerCase());
+    return eventTypes[eventTypeIndex];
+  });
 };
 
 const getMoney = (routePointsTypes, routePoints) => {
   return routePointsTypes.map((type) => routePoints.slice()
-                                          .filter((it) => it.eventType.name === type.name)
+                                          .filter((it) => it.eventType.toLowerCase() === type.name.toLowerCase())
                                           .map((it) => it.eventCoast)
                                           .reduce((previousValue, currentValue) => previousValue + currentValue));
 };
 
 const getTransport = (routePointsTypes, routePoints) => {
   return routePointsTypes.map((type) => routePoints.slice()
-                                          .filter((it) => it.eventType.name === type.name).length);
+                                          .filter((it) => it.eventType.toLowerCase() === type.name.toLowerCase()).length);
 };
 
 const getTimeSpendList = (routePointsTypes, routePoints) => {
   return routePointsTypes.map((type) => routePoints.slice()
-                                          .filter((it) => it.eventType.name === type.name)
+                                          .filter((it) => it.eventType.toLowerCase() === type.name.toLowerCase())
                                           .map((it) => it.eventEndDate - it.eventStartDate)
                                           .reduce((previousValue, currentValue) => previousValue + currentValue));
 };
@@ -26795,6 +26872,7 @@ class Statistic extends _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_1_
     this._timeSpendChart = null;
 
     this._routePoints = null;
+    this._eventTypes = null;
     this._routePointsTypeList = null;
   }
 
@@ -26802,13 +26880,14 @@ class Statistic extends _abstract_smart_component_js__WEBPACK_IMPORTED_MODULE_1_
     return createStatisticTemplate();
   }
 
-  getData(routePoints) {
+  getData(routePoints, eventTypes) {
     this._routePoints = routePoints;
+    this._eventTypes = eventTypes;
   }
 
   show() {
     super.show();
-    this._routePointsTypeList = getRoutePointsTypeList(this._routePoints);
+    this._routePointsTypeList = getRoutePointsTypeList(this._routePoints, this._eventTypes);
 
     this.rerender();
   }
@@ -27010,18 +27089,17 @@ class FilterController {
 /*!**********************************!*\
   !*** ./src/controllers/point.js ***!
   \**********************************/
-/*! exports provided: Mode, EmptyRoutePoint, default */
+/*! exports provided: Mode, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Mode", function() { return Mode; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EmptyRoutePoint", function() { return EmptyRoutePoint; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return PointController; });
 /* harmony import */ var _components_route_point_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../components/route-point.js */ "./src/components/route-point.js");
 /* harmony import */ var _components_route_point_edit_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/route-point-edit.js */ "./src/components/route-point-edit.js");
 /* harmony import */ var _utils_render_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/render.js */ "./src/utils/render.js");
-/* harmony import */ var _mock_route_point_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../mock/route-point.js */ "./src/mock/route-point.js");
+/* harmony import */ var _models_point_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../models/point.js */ "./src/models/point.js");
 
 
 
@@ -27035,22 +27113,55 @@ const Mode = {
   ADDING: `adding`,
 };
 
-const EmptyRoutePoint = {
-  id: Date.now(),
-  eventStartDate: Date.now(),
-  eventEndDate: Date.now(),
-  eventCoast: 0,
-  eventOffers: [],
-  eventType: _mock_route_point_js__WEBPACK_IMPORTED_MODULE_3__["eventTypes"][FIRST_ELEMENT],
-  eventDestination: _mock_route_point_js__WEBPACK_IMPORTED_MODULE_3__["destinations"][FIRST_ELEMENT],
-  eventIsFavorite: false,
+const parseFormData = (formData, eventTypes, destinations) => {
+  let selectedOffers = [];
+  for (let key of formData.keys()) {
+    if (key.startsWith(`event-offer`)) {
+      selectedOffers.push(key.substring(12));
+    }
+  }
+  const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === formData.get(`event-type-data`).toLowerCase());
+  const eventTypeStructure = eventTypes[eventTypeIndex];
+
+  let selectedDestination = {};
+  const destinationIndex = destinations.findIndex(((destination) => {
+    return destination.name === formData.get(`event-destination`);
+  }));
+
+  selectedDestination.name = destinations[destinationIndex].name;
+  selectedDestination.description = destinations[destinationIndex].description;
+  selectedDestination.pictures = destinations[destinationIndex].photos;
+
+  const routePointModel = new _models_point_js__WEBPACK_IMPORTED_MODULE_3__["default"]({
+    "id": formData.get(`event-id`),
+    "date_from": (formData.get(`event-start-time`)),
+    "date_to": (formData.get(`event-end-time`)),
+    "base_price": formData.get(`event-price`),
+    "is_favorite": formData.get(`event-favorite`) === `true`,
+
+    "offers": eventTypeStructure.offers.slice().filter((offer) => {
+      return selectedOffers.includes(offer.key);
+    }).map((it) => ({
+      title: it.name,
+      price: it.coast,
+      key: it.key,
+    })),
+
+    "destination": selectedDestination,
+    "type": formData.get(`event-type-data`),
+  });
+
+  return routePointModel;
 };
 
 class PointController {
-  constructor(container, onDataChange, onViewChange) {
+  constructor(container, onDataChange, onViewChange, offersList, destinationsList) {
     this._container = container;
     this._onDataChange = onDataChange;
     this._onViewChange = onViewChange;
+
+    this._offersList = offersList;
+    this._destinationsList = destinationsList;
 
     this._mode = Mode.DEFAULT;
     this._routePointComponent = null;
@@ -27061,13 +27172,26 @@ class PointController {
     this._openRoutePointEditForm = this._openRoutePointEditForm.bind(this);
   }
 
+  static getEmptyRoutePoint(offersList, destinationsList) {
+    return {
+      id: Date.now(),
+      eventStartDate: Date.now(),
+      eventEndDate: Date.now(),
+      eventCoast: 0,
+      eventOffers: [],
+      eventType: offersList[FIRST_ELEMENT].name,
+      eventDestination: destinationsList[FIRST_ELEMENT],
+      eventIsFavorite: false,
+    };
+  }
+
   render(routePoint, mode = Mode.DEFAULT) {
     const oldRoutePointComponent = this._routePointComponent;
     const oldRoutePointEditComponent = this._routePointEditComponent;
     this._mode = mode;
 
-    this._routePointComponent = new _components_route_point_js__WEBPACK_IMPORTED_MODULE_0__["default"](routePoint);
-    this._routePointEditComponent = new _components_route_point_edit_js__WEBPACK_IMPORTED_MODULE_1__["default"](routePoint, this._mode === Mode.ADDING);
+    this._routePointComponent = new _components_route_point_js__WEBPACK_IMPORTED_MODULE_0__["default"](routePoint, this._offersList);
+    this._routePointEditComponent = new _components_route_point_edit_js__WEBPACK_IMPORTED_MODULE_1__["default"](routePoint, this._mode === Mode.ADDING, this._offersList, this._destinationsList);
 
     this._routePointComponent.setRollupButtonClickHandler(() => {
       this._openRoutePointEditForm();
@@ -27076,11 +27200,12 @@ class PointController {
 
     this._routePointEditComponent.setSubmitHandler((evt) => {
       evt.preventDefault();
-      const editedRoutePoint = this._routePointEditComponent.getData();
-      this._onDataChange(this, routePoint, editedRoutePoint);
+
+      const formData = this._routePointEditComponent.getData();
+      const data = parseFormData(formData, this._offersList, this._destinationsList);
+      this._onDataChange(this, routePoint, data);
       document.removeEventListener(`keydown`, this._onEscKeyDown);
       this._colseRoutePointEditForm();
-
     });
 
     this._routePointEditComponent.setResetHandler((evt) => {
@@ -27096,14 +27221,18 @@ class PointController {
     });
 
     this._routePointEditComponent.setFavoriteButtonClickHandler(() => {
-      this._onDataChange(this, routePoint, Object.assign({}, routePoint, {
-        eventIsFavorite: !routePoint.eventIsFavorite,
-      }), false);
+      const newRoutePoint = _models_point_js__WEBPACK_IMPORTED_MODULE_3__["default"].clone(routePoint);
+      newRoutePoint.isFavorite = !newRoutePoint.isFavorite;
+
+      this._onDataChange(this, routePoint, newRoutePoint);
     });
 
     this._routePointEditComponent.setDeleteButtonClickHandler((evt) => {
       evt.preventDefault();
       this._onDataChange(this, routePoint, null);
+      if (mode === Mode.ADDING) {
+        this._onViewChange();
+      }
     });
 
     switch (mode) {
@@ -27163,7 +27292,7 @@ class PointController {
 
     if (isEscKey) {
       if (this._mode === Mode.ADDING) {
-        this._onDataChange(this, EmptyRoutePoint, null);
+        this._onDataChange(this, this.getEmptyRoutePoint(this._offersList, this._destinationsList), null);
       }
       this._colseRoutePointEditForm();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
@@ -27221,7 +27350,7 @@ const getSortedRoutePoints = (routePoints, sortType) => {
 };
 
 class TripController {
-  constructor(container, routePointsModel, routeCoast, routeInfo, filterController, routeStat) {
+  constructor(container, routePointsModel, routeCoast, routeInfo, filterController, routeStat, offersList, destinationsList, api) {
     this._filterController = filterController;
     this._routePointsModel = routePointsModel;
     this._sortType = _components_sorting_js__WEBPACK_IMPORTED_MODULE_0__["SortType"].EVENT;
@@ -27232,6 +27361,10 @@ class TripController {
     this._days = [];
     this._creatingRoutePoint = null;
     this._noRoutePoints = null;
+    this._api = api;
+
+    this._offersList = offersList;
+    this._destinationsList = destinationsList;
 
     this._container = container;
     this._sortComponent = new _components_sorting_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
@@ -27278,7 +27411,7 @@ class TripController {
         this._days.push(dayComponent);
         Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_4__["render"])(daysComponent.getElement(), dayComponent, _utils_render_js__WEBPACK_IMPORTED_MODULE_4__["RenderPosition"].BEFOREEND);
       }
-      const routePointController = new _point_js__WEBPACK_IMPORTED_MODULE_6__["default"](dayComponent.getElement().querySelector(`.trip-events__list`), onDataChange, onViewChange);
+      const routePointController = new _point_js__WEBPACK_IMPORTED_MODULE_6__["default"](dayComponent.getElement().querySelector(`.trip-events__list`), onDataChange, onViewChange, this._offersList, this._destinationsList);
       routePointController.render(routePoint, _point_js__WEBPACK_IMPORTED_MODULE_6__["Mode"].DEFAULT);
       return routePointController;
     });
@@ -27312,8 +27445,8 @@ class TripController {
     this._filterController.filterAtStart();
     this._onFilterChange();
     this._showedRoutePointControllers.forEach((it) => it.setDefaultView());
-    this._creatingRoutePoint = new _point_js__WEBPACK_IMPORTED_MODULE_6__["default"](this._daysComponent.getElement(), this._onDataChange, this._onViewChange);
-    this._creatingRoutePoint.render(_point_js__WEBPACK_IMPORTED_MODULE_6__["EmptyRoutePoint"], _point_js__WEBPACK_IMPORTED_MODULE_6__["Mode"].ADDING);
+    this._creatingRoutePoint = new _point_js__WEBPACK_IMPORTED_MODULE_6__["default"](this._daysComponent.getElement(), this._onDataChange, this._onViewChange, this._offersList, this._destinationsList);
+    this._creatingRoutePoint.render(_point_js__WEBPACK_IMPORTED_MODULE_6__["default"].getEmptyRoutePoint(this._offersList, this._destinationsList), _point_js__WEBPACK_IMPORTED_MODULE_6__["Mode"].ADDING);
   }
 
   _removeRoutePoints() {
@@ -27328,8 +27461,14 @@ class TripController {
     this._renderRoutePoints(this._routePointsModel.getRoutePoints(), sortType);
   }
 
+  _updateRouteInfo() {
+    this._routeCoast.calculate(this._routePointsModel.getRoutePoints());
+    this._routeInfo.generate(this._routePointsModel.getRoutePoints());
+    this._routeStat.getData(this._routePointsModel.getRoutePoints(), this._offersList);
+  }
+
   _onDataChange(routePointController, oldData, newData, updateData = true) {
-    if (oldData === _point_js__WEBPACK_IMPORTED_MODULE_6__["EmptyRoutePoint"]) {
+    if (oldData === _point_js__WEBPACK_IMPORTED_MODULE_6__["default"].getEmptyRoutePoint(this._offersList, this._destinationsList)) {
       this._creatingRoutePoint = null;
       if (newData === null) {
         routePointController.destroy();
@@ -27347,18 +27486,18 @@ class TripController {
       this._onSortTypeChange(this._sortType);
     } else {
 
-      const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, newData);
-      if (isSuccess) {
-        if (updateData) {
-          routePointController.render(newData);
-          this._onSortTypeChange(this._sortType);
-        }
-      }
+      this._api.updateRoutePoint(oldData.id, newData)
+        .then((routePointModel) => {
+          const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, routePointModel);
+          if (isSuccess) {
+            if (updateData) {
+              routePointController.render(routePointModel);
+              this._onSortTypeChange(this._sortType);
+              this._updateRouteInfo();
+            }
+          }
+        });
     }
-
-    this._routeCoast.calculate(this._routePointsModel.getRoutePoints());
-    this._routeInfo.generate(this._routePointsModel.getRoutePoints());
-    this._routeStat.getData(this._routePointsModel.getRoutePoints());
   }
 
   _onViewChange() {
@@ -27400,19 +27539,18 @@ class TripController {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _components_route_info_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./components/route-info.js */ "./src/components/route-info.js");
-/* harmony import */ var _components_route_cost_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/route-cost.js */ "./src/components/route-cost.js");
-/* harmony import */ var _components_menu_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/menu.js */ "./src/components/menu.js");
-/* harmony import */ var _components_new_point_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/new-point.js */ "./src/components/new-point.js");
-/* harmony import */ var _const_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./const.js */ "./src/const.js");
-/* harmony import */ var _controllers_filter_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./controllers/filter.js */ "./src/controllers/filter.js");
-/* harmony import */ var _utils_render_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./utils/render.js */ "./src/utils/render.js");
-/* harmony import */ var _mock_route_point_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./mock/route-point.js */ "./src/mock/route-point.js");
+/* harmony import */ var _api_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./api.js */ "./src/api.js");
+/* harmony import */ var _components_route_info_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/route-info.js */ "./src/components/route-info.js");
+/* harmony import */ var _components_route_cost_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/route-cost.js */ "./src/components/route-cost.js");
+/* harmony import */ var _components_menu_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/menu.js */ "./src/components/menu.js");
+/* harmony import */ var _components_new_point_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/new-point.js */ "./src/components/new-point.js");
+/* harmony import */ var _const_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./const.js */ "./src/const.js");
+/* harmony import */ var _controllers_filter_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./controllers/filter.js */ "./src/controllers/filter.js");
+/* harmony import */ var _utils_render_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./utils/render.js */ "./src/utils/render.js");
 /* harmony import */ var _controllers_trip_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./controllers/trip.js */ "./src/controllers/trip.js");
 /* harmony import */ var _models_points_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./models/points.js */ "./src/models/points.js");
 /* harmony import */ var _components_trip_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/trip.js */ "./src/components/trip.js");
 /* harmony import */ var _components_statistics_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./components/statistics.js */ "./src/components/statistics.js");
-const ROUTE_POINTS_COUNT = 10;
 
 
 
@@ -27426,259 +27564,253 @@ const ROUTE_POINTS_COUNT = 10;
 
 
 
+const AUTHORIZATION = `Basic er883jdzbdw`;
+const END_POINT = `https://11.ecmascript.pages.academy/big-trip`;
 
-const routePoints = Object(_mock_route_point_js__WEBPACK_IMPORTED_MODULE_7__["generateRoutePoints"])(ROUTE_POINTS_COUNT).sort((a, b) => a.eventStartDate - b.eventStartDate);
+const api = new _api_js__WEBPACK_IMPORTED_MODULE_0__["default"](END_POINT, AUTHORIZATION);
 
 const routePointsModel = new _models_points_js__WEBPACK_IMPORTED_MODULE_9__["default"]();
-routePointsModel.setRoutePoints(routePoints);
 
 const tripMainElement = document.querySelector(`.trip-main`);
-const routeInfo = new _components_route_info_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
-routeInfo.generate(routePoints);
-Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_6__["render"])(tripMainElement, routeInfo, _utils_render_js__WEBPACK_IMPORTED_MODULE_6__["RenderPosition"].AFTERBEGIN);
 
-const tripInfo = tripMainElement.querySelector(`.trip-info__main`);
-const routeCoast = new _components_route_cost_js__WEBPACK_IMPORTED_MODULE_1__["default"]();
-routeCoast.calculate(routePoints);
-Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_6__["render"])(tripInfo, routeCoast, _utils_render_js__WEBPACK_IMPORTED_MODULE_6__["RenderPosition"].AFTEREND);
+const routeInfo = new _components_route_info_js__WEBPACK_IMPORTED_MODULE_1__["default"]();
+const routeCoast = new _components_route_cost_js__WEBPACK_IMPORTED_MODULE_2__["default"]();
 
 const tripControls = tripMainElement.querySelector(`.trip-controls`);
 const tripMenu = tripControls.querySelector(`h2`);
-const mainMenu = new _components_menu_js__WEBPACK_IMPORTED_MODULE_2__["default"]();
-mainMenu.setActiveItem(_const_js__WEBPACK_IMPORTED_MODULE_4__["MenuElement"].TABLE);
-Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_6__["render"])(tripMenu, mainMenu, _utils_render_js__WEBPACK_IMPORTED_MODULE_6__["RenderPosition"].AFTEREND);
+const mainMenu = new _components_menu_js__WEBPACK_IMPORTED_MODULE_3__["default"]();
+const filterController = new _controllers_filter_js__WEBPACK_IMPORTED_MODULE_6__["default"](tripControls, routePointsModel);
+const tripEvents = document.querySelector(`.page-main .page-body__container`);
+const statisticsComponent = new _components_statistics_js__WEBPACK_IMPORTED_MODULE_11__["default"]();
+const tripComponent = new _components_trip_js__WEBPACK_IMPORTED_MODULE_10__["default"]();
 
-const filterController = new _controllers_filter_js__WEBPACK_IMPORTED_MODULE_5__["default"](tripControls, routePointsModel);
+let offersList = [];
+let destinationsList = [];
+
+const generateTripController = (routePoints) => {
+  const tripController = new _controllers_trip_js__WEBPACK_IMPORTED_MODULE_8__["default"](tripComponent, routePointsModel, routeCoast, routeInfo, filterController, statisticsComponent, offersList, destinationsList, api);
+
+  const startSorditngRoutePoints = routePoints.sort((a, b) => a.eventStartDate - b.eventStartDate);
+
+  const newPoint = new _components_new_point_js__WEBPACK_IMPORTED_MODULE_4__["default"]();
+  Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_7__["render"])(tripMainElement, newPoint, _utils_render_js__WEBPACK_IMPORTED_MODULE_7__["RenderPosition"].BEFOREEND);
+
+  newPoint.setOnClick(() => {
+    tripController.createRoutePoint();
+  });
+
+  statisticsComponent.hide();
+  tripController.show();
+
+  mainMenu.setOnClick((menuItem) => {
+    switch (menuItem) {
+      case _const_js__WEBPACK_IMPORTED_MODULE_5__["MenuElement"].TABLE:
+        tripController.setSortDefault();
+        mainMenu.setActiveItem(_const_js__WEBPACK_IMPORTED_MODULE_5__["MenuElement"].TABLE);
+        statisticsComponent.hide();
+        tripController.show();
+        break;
+      case _const_js__WEBPACK_IMPORTED_MODULE_5__["MenuElement"].STATISTICS:
+        tripController.setSortDefault();
+        mainMenu.setActiveItem(_const_js__WEBPACK_IMPORTED_MODULE_5__["MenuElement"].STATISTICS);
+        statisticsComponent.show();
+        tripController.hide();
+        break;
+    }
+  });
+
+  routePointsModel.setRoutePoints(startSorditngRoutePoints);
+
+  tripController.render(startSorditngRoutePoints);
+
+  routeInfo.generate(startSorditngRoutePoints);
+  Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_7__["render"])(tripMainElement, routeInfo, _utils_render_js__WEBPACK_IMPORTED_MODULE_7__["RenderPosition"].AFTERBEGIN);
+
+  routeCoast.calculate(startSorditngRoutePoints);
+  const tripInfo = tripMainElement.querySelector(`.trip-info__main`);
+  Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_7__["render"])(tripInfo, routeCoast, _utils_render_js__WEBPACK_IMPORTED_MODULE_7__["RenderPosition"].AFTEREND);
+
+  statisticsComponent.getData(startSorditngRoutePoints, offersList);
+  statisticsComponent.hide();
+};
+
+
+mainMenu.setActiveItem(_const_js__WEBPACK_IMPORTED_MODULE_5__["MenuElement"].TABLE);
+Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_7__["render"])(tripMenu, mainMenu, _utils_render_js__WEBPACK_IMPORTED_MODULE_7__["RenderPosition"].AFTEREND);
 filterController.render();
 
-const tripEvents = document.querySelector(`.page-main .page-body__container`);
+Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_7__["render"])(tripEvents, statisticsComponent, _utils_render_js__WEBPACK_IMPORTED_MODULE_7__["RenderPosition"].AFTERBEGIN);
+Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_7__["render"])(tripEvents, tripComponent, _utils_render_js__WEBPACK_IMPORTED_MODULE_7__["RenderPosition"].BEFOREEND);
 
-const statisticsComponent = new _components_statistics_js__WEBPACK_IMPORTED_MODULE_11__["default"]();
-Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_6__["render"])(tripEvents, statisticsComponent, _utils_render_js__WEBPACK_IMPORTED_MODULE_6__["RenderPosition"].AFTERBEGIN);
-statisticsComponent.getData(routePoints);
-statisticsComponent.hide();
+api.getOffers()
+  .then((offers) => {
+    offersList = offers;
 
+    api.getDestinations()
+      .then((destinations) => {
+        destinationsList = destinations;
 
-const tripComponent = new _components_trip_js__WEBPACK_IMPORTED_MODULE_10__["default"]();
-Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_6__["render"])(tripEvents, tripComponent, _utils_render_js__WEBPACK_IMPORTED_MODULE_6__["RenderPosition"].BEFOREEND);
-const tripController = new _controllers_trip_js__WEBPACK_IMPORTED_MODULE_8__["default"](tripComponent, routePointsModel, routeCoast, routeInfo, filterController, statisticsComponent);
-tripController.render(routePoints);
-
-const newPoint = new _components_new_point_js__WEBPACK_IMPORTED_MODULE_3__["default"]();
-Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_6__["render"])(tripMainElement, newPoint, _utils_render_js__WEBPACK_IMPORTED_MODULE_6__["RenderPosition"].BEFOREEND);
-
-newPoint.setOnClick(() => {
-  tripController.createRoutePoint();
-});
-
-statisticsComponent.hide();
-tripController.show();
-
-mainMenu.setOnClick((menuItem) => {
-  switch (menuItem) {
-    case _const_js__WEBPACK_IMPORTED_MODULE_4__["MenuElement"].TABLE:
-      tripController.setSortDefault();
-      mainMenu.setActiveItem(_const_js__WEBPACK_IMPORTED_MODULE_4__["MenuElement"].TABLE);
-      statisticsComponent.hide();
-      tripController.show();
-      break;
-    case _const_js__WEBPACK_IMPORTED_MODULE_4__["MenuElement"].STATISTICS:
-      tripController.setSortDefault();
-      mainMenu.setActiveItem(_const_js__WEBPACK_IMPORTED_MODULE_4__["MenuElement"].STATISTICS);
-      statisticsComponent.show();
-      tripController.hide();
-      break;
-  }
-});
+        api.getRoutePoints()
+            .then((routePoints) => {
+              generateTripController(routePoints);
+            });
+      });
+  });
 
 
 /***/ }),
 
-/***/ "./src/mock/route-point.js":
-/*!*********************************!*\
-  !*** ./src/mock/route-point.js ***!
-  \*********************************/
-/*! exports provided: destinations, eventTypes, generateRoutePointStructure, generateRoutePoints */
+/***/ "./src/models/destination.js":
+/*!***********************************!*\
+  !*** ./src/models/destination.js ***!
+  \***********************************/
+/*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "destinations", function() { return destinations; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "eventTypes", function() { return eventTypes; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "generateRoutePointStructure", function() { return generateRoutePointStructure; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "generateRoutePoints", function() { return generateRoutePoints; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Destination; });
+class Destination {
+  constructor(data) {
+    this.name = data[`name`];
+    this.description = data[`description`];
+    this.photos = data[`pictures`];
+  }
+
+  static parseDestination(data) {
+    return new Destination(data);
+  }
+
+  static parseDestinations(data) {
+    return data.map(Destination.parseDestination);
+  }
+}
+
+
+/***/ }),
+
+/***/ "./src/models/offer.js":
+/*!*****************************!*\
+  !*** ./src/models/offer.js ***!
+  \*****************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Offer; });
+const EventTypes = {
+  TRANSFER: `Transfer`,
+  ACTIVITY: `Activity`,
+};
+
+const ACTIVITIES = [`Check-in`, `Sightseeing`, `Restaurant`];
+
+class Offer {
+  constructor(data) {
+    this.name = data[`type`];
+    this.type = ACTIVITIES.findIndex((it) => it.toLowerCase() === data[`type`]) < 0 ? EventTypes.TRANSFER : EventTypes.ACTIVITY;
+    this.offers = [];
+    data[`offers`].forEach((offer) => {
+      this.offers.push({
+        name: offer.title,
+        key: `event-offer-${offer.title.toLowerCase().replace(/\s/g, `-`)}`,
+        coast: offer.price,
+      });
+    });
+  }
+
+  static parseOffer(data) {
+    return new Offer(data);
+  }
+
+  static parseOffers(data) {
+    return data.map(Offer.parseOffer);
+  }
+}
+
+
+/***/ }),
+
+/***/ "./src/models/point.js":
+/*!*****************************!*\
+  !*** ./src/models/point.js ***!
+  \*****************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Point; });
 /* harmony import */ var _utils_common_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/common.js */ "./src/utils/common.js");
 
 
-const MINUTE = (1000 * 60);
-const HOUR = (1000 * 60 * 60);
-const DAY = (1000 * 60 * 60 * 24);
-const DAYS = 10;
-const HOURS = 40;
-const MINUTES = 70;
-const MAX_COAST = 1000;
-const MAX_PHOTOS_COUNT = 4;
-const MAX_DESCRIPTIONS = 5;
-const MAX_ROUTE_OPTIONS = 5;
+class Point {
+  constructor(data) {
+    this.id = data[`id`];
+    this.eventStartDate = Date.parse(data[`date_from`]);
+    this.eventEndDate = Date.parse(data[`date_to`]);
+    this.eventCoast = data[`base_price`];
 
-const generateDescription = () => {
-  const textDescriptions = [
-    `Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
-    `Cras aliquet varius magna, non porta ligula feugiat eget.`,
-    `Fusce tristique felis at fermentum pharetra.`,
-    `Aliquam id orci ut lectus varius viverra.`,
-    `Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.`,
-    `Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.`,
-    `Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui.`,
-    `Sed sed nisi sed augue convallis suscipit in sed felis.`,
-    `Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus.`,
-    `In rutrum ac purus sit amet tempus.`,
-  ];
+    this.eventOffers = [];
+    data[`offers`].forEach((offer) => {
+      this.eventOffers.push({
+        name: offer.title,
+        key: `event-offer-${offer.title.toLowerCase().replace(/\s/g, `-`)}`,
+        coast: offer.price,
+      });
+    });
 
-  const randomText = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomNumbers"])(0, textDescriptions.length, Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(MAX_DESCRIPTIONS) + 1);
-  return randomText.map((it) => textDescriptions[it]);
-};
+    this.eventType = data[`type`][0].toUpperCase() + data[`type`].slice(1);
 
-const generatePhoto = () => `http://picsum.photos/248/152?r=${Math.random()}`;
+    this.eventDestination = {};
+    this.eventDestination.name = data[`destination`].name;
+    this.eventDestination.description = data[`destination`].description;
+    this.eventDestination.photos = data[`destination`].pictures;
 
-const generatePhotos = (count) => {
-  return new Array(count)
-   .fill(``)
-   .map(generatePhoto);
-};
+    this.eventIsFavorite = data[`is_favorite`];
+  }
 
-const destinations = [
-  {
-    name: `Amsterdam`,
-    description: generateDescription(),
-    photos: generatePhotos(Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(MAX_PHOTOS_COUNT) + 1),
-  },
-  {
-    name: `Geneva`,
-    description: generateDescription(),
-    photos: generatePhotos(Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(MAX_PHOTOS_COUNT) + 1),
-  },
-  {
-    name: `Chamonix`,
-    description: generateDescription(),
-    photos: generatePhotos(Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(MAX_PHOTOS_COUNT) + 1),
-  },
-  {
-    name: `Saint Petersburg`,
-    description: generateDescription(),
-    photos: generatePhotos(Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(MAX_PHOTOS_COUNT) + 1),
-  },
-];
+  toRAW() {
+    const offers = [];
+    this.eventOffers.forEach((offer) => {
+      offers.push({
+        title: offer.name,
+        price: offer.coast,
+      });
+    });
 
-const generateCoast = () => {
-  return Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(MAX_COAST);
-};
+    const destination = {};
+    destination.description = this.eventDestination.description;
+    destination.name = this.eventDestination.name;
+    destination.pictures = this.eventDestination.photos;
 
-const generateRouteOptions = () => {
-  const routeOptions = [
-    {
-      name: `Add luggage`,
-      key: `luggage`,
-      coast: generateCoast(),
-    },
-    {
-      name: `Switch to comfort`,
-      key: `comfort`,
-      coast: generateCoast(),
-    },
-    {
-      name: `Add meal`,
-      key: `meal`,
-      coast: generateCoast(),
-    },
-    {
-      name: `Choose seats`,
-      key: `seats`,
-      coast: generateCoast(),
-    },
-    {
-      name: `Travel by train`,
-      key: `train`,
-      coast: generateCoast(),
-    },
-  ];
+    const rawData = {
+      "base_price": parseInt(this.eventCoast, 10),
+      "date_from": Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["setDateToHTMLFormat"])(this.eventStartDate),
+      "date_to": Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["setDateToHTMLFormat"])(this.eventEndDate),
+      "destination": destination,
+      "id": this.id,
+      "is_favorite": this.eventIsFavorite,
+      "offers": offers,
+      "type": this.eventType.toLowerCase(),
+    };
 
-  const options = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomNumbers"])(0, routeOptions.length, Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(MAX_ROUTE_OPTIONS));
-  return options.map((it) => routeOptions[it]);
-};
+    return rawData;
+  }
 
-const eventTypes = [
-  {
-    name: `Taxi`,
-    type: `Transfer`,
-    offers: generateRouteOptions(),
-  },
-  {
-    name: `Bus`,
-    type: `Transfer`,
-    offers: generateRouteOptions(),
-  },
-  {
-    name: `Train`,
-    type: `Transfer`,
-    offers: generateRouteOptions(),
-  },
-  {
-    name: `Ship`,
-    type: `Transfer`,
-    offers: generateRouteOptions(),
-  },
-  {
-    name: `Transport`,
-    type: `Transfer`,
-    offers: generateRouteOptions(),
-  },
-  {
-    name: `Drive`,
-    type: `Transfer`,
-    offers: generateRouteOptions(),
-  },
-  {
-    name: `Flight`,
-    type: `Transfer`,
-    offers: generateRouteOptions(),
-  },
-  {
-    name: `Check-in`,
-    type: `Activity`,
-    offers: generateRouteOptions(),
-  },
-  {
-    name: `Sightseeing`,
-    type: `Activity`,
-    offers: generateRouteOptions(),
-  },
-  {
-    name: `Restaurant`,
-    type: `Activity`,
-    offers: generateRouteOptions(),
-  },
-];
+  static parsePoint(data) {
+    return new Point(data);
+  }
 
-const generateRoutePointStructure = () => {
-  const startDate = Date.now() - (5 * DAY) + (Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(DAYS) * DAY) + (Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(HOURS) * HOUR) + (Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(MINUTES) * MINUTE);
-  return ({
-    id: String(new Date() + Math.random()),
-    eventStartDate: startDate,
-    eventEndDate: startDate + (Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(HOURS) * HOUR) + (Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(MINUTES) * MINUTE),
-    eventCoast: generateCoast(),
-    eventOffers: generateRouteOptions(),
-    eventType: eventTypes[Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(eventTypes.length)],
-    eventDestination: destinations[Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(destinations.length)],
-    eventIsFavorite: Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["getRandomInt"])(3) > 1 ? true : false,
-  });
-};
+  static parsePoints(data) {
+    return data.map(Point.parsePoint);
+  }
 
-const generateRoutePoints = (count) => {
-  return new Array(count)
-    .fill(``)
-    .map(generateRoutePointStructure);
-};
+  static clone(data) {
+    return new Point(data.toRAW());
+  }
+}
 
 
 /***/ }),

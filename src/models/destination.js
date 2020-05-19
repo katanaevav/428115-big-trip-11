@@ -1,5 +1,3 @@
-// destinations
-
 export default class Destination {
   constructor(data) {
     this.name = data[`name`];

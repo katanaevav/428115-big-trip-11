@@ -1,8 +1,7 @@
-// routePoints
+import {setDateToHTMLFormat} from "../utils/common.js";
 
 export default class Point {
   constructor(data) {
-    console.log(data);
     this.id = data[`id`];
     this.eventStartDate = Date.parse(data[`date_from`]);
     this.eventEndDate = Date.parse(data[`date_to`]);
@@ -31,26 +30,28 @@ export default class Point {
     const offers = [];
     this.eventOffers.forEach((offer) => {
       offers.push({
-        title: offer.title,
-        price: offer.price,
+        title: offer.name,
+        price: offer.coast,
       });
     });
 
     const destination = {};
-    destination.description = this.eventDestination.name;
-    destination.name = this.eventDestination.description;
+    destination.description = this.eventDestination.description;
+    destination.name = this.eventDestination.name;
     destination.pictures = this.eventDestination.photos;
 
-    return {
-      "id": this.id,
-      "date_from": this.eventStartDate,
-      "date_to": this.eventEndDate,
-      "base_price": this.eventCoast,
-      "offers": offers,
-      "is_favorite": this.eventIsFavorite,
-      "type": this.eventType.toLowerCase(),
+    const rawData = {
+      "base_price": parseInt(this.eventCoast, 10),
+      "date_from": setDateToHTMLFormat(this.eventStartDate),
+      "date_to": setDateToHTMLFormat(this.eventEndDate),
       "destination": destination,
+      "id": this.id,
+      "is_favorite": this.eventIsFavorite,
+      "offers": offers,
+      "type": this.eventType.toLowerCase(),
     };
+
+    return rawData;
   }
 
   static parsePoint(data) {

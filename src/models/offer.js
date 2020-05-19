@@ -1,5 +1,3 @@
-// eventTypes
-
 const EventTypes = {
   TRANSFER: `Transfer`,
   ACTIVITY: `Activity`,

@@ -7,7 +7,6 @@ import moment from "moment";
 const BAR_HEIGHT = 55;
 
 const getRoutePointsTypeList = (routePoints, eventTypes) => {
-  // return uniqueItems(routePoints.map((it) => it.eventType));
   return uniqueItems(routePoints.map((it) => it.eventType)).map((type) => {
     const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === type.toLowerCase());
     return eventTypes[eventTypeIndex];
