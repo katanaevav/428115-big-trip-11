@@ -35,7 +35,7 @@ const parseFormData = (formData, eventTypes, destinations) => {
     "date_from": (formData.get(`event-start-time`)),
     "date_to": (formData.get(`event-end-time`)),
     "base_price": formData.get(`event-price`),
-    "is_favorite": formData.get(`event-favorite`) === `true`,
+    "is_favorite": formData.get(`event-favorite`) === `on`,
 
     "offers": eventTypeStructure.offers.slice().filter((offer) => {
       return selectedOffers.includes(offer.key);
@@ -120,9 +120,8 @@ export default class PointController {
 
     this._routePointEditComponent.setFavoriteButtonClickHandler(() => {
       const newRoutePoint = RoutePointModel.clone(routePoint);
-      newRoutePoint.isFavorite = !newRoutePoint.isFavorite;
-
-      this._onDataChange(this, routePoint, newRoutePoint);
+      newRoutePoint.eventIsFavorite = !newRoutePoint.eventIsFavorite;
+      this._onDataChange(this, routePoint, newRoutePoint, false);
     });
 
     this._routePointEditComponent.setDeleteButtonClickHandler((evt) => {

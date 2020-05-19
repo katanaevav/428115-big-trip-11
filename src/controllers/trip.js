@@ -167,8 +167,8 @@ export default class TripController {
         .then((routePointModel) => {
           const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, routePointModel);
           if (isSuccess) {
+            routePointController.render(routePointModel);
             if (updateData) {
-              routePointController.render(routePointModel);
               this._onSortTypeChange(this._sortType);
               this._updateRouteInfo();
             }
