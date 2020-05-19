@@ -1,22 +1,22 @@
-import {setDateToHTMLFormat} from "../utils/common.js";
+import {setDateToHTMLFormat, firstButtonUpCase} from "../utils/common.js";
 
 export default class Point {
   constructor(data) {
     this.id = data[`id`];
     this.eventStartDate = Date.parse(data[`date_from`]);
     this.eventEndDate = Date.parse(data[`date_to`]);
-    this.eventCoast = data[`base_price`];
+    this.eventCoast = parseInt(data[`base_price`], 10);
 
     this.eventOffers = [];
     data[`offers`].forEach((offer) => {
       this.eventOffers.push({
         name: offer.title,
         key: `event-offer-${offer.title.toLowerCase().replace(/\s/g, `-`)}`,
-        coast: offer.price,
+        coast: parseInt(offer.price, 10),
       });
     });
 
-    this.eventType = data[`type`][0].toUpperCase() + data[`type`].slice(1);
+    this.eventType = firstButtonUpCase(data[`type`]);
 
     this.eventDestination = {};
     this.eventDestination.name = data[`destination`].name;

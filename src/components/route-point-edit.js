@@ -1,4 +1,4 @@
-import {uniqueItems, pretextFromEventType} from "../utils/common.js";
+import {uniqueItems, pretextFromEventType, firstButtonUpCase} from "../utils/common.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
@@ -156,7 +156,7 @@ const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint,
 
   const destinationList = destinations.map((destination) => generateDestinationTemplate(destination.name)).join(`\n`);
 
-  const eventName = selectedEventType;
+  const eventName = firstButtonUpCase(selectedEventType);
 
 
   const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === selectedEventType.toLowerCase());

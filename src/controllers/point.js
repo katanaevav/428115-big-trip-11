@@ -153,6 +153,15 @@ export default class PointController {
         render(this._container, this._routePointEditComponent, RenderPosition.AFTERBEGIN);
         this._routePointEditComponent.applyFlatpickr();
         break;
+      case Mode.EDIT:
+        if (oldRoutePointEditComponent && oldRoutePointComponent) {
+          remove(oldRoutePointComponent);
+          remove(oldRoutePointEditComponent);
+        }
+        document.addEventListener(`keydown`, this._onEscKeyDown);
+        render(this._container, this._routePointEditComponent, RenderPosition.AFTERBEGIN);
+        this._routePointEditComponent.applyFlatpickr();
+        break;
     }
   }
 

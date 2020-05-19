@@ -26092,7 +26092,7 @@ const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint,
 
   const destinationList = destinations.map((destination) => generateDestinationTemplate(destination.name)).join(`\n`);
 
-  const eventName = selectedEventType;
+  const eventName = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["firstButtonUpCase"])(selectedEventType);
 
 
   const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === selectedEventType.toLowerCase());
@@ -27137,7 +27137,7 @@ const parseFormData = (formData, eventTypes, destinations) => {
     "date_from": (formData.get(`event-start-time`)),
     "date_to": (formData.get(`event-end-time`)),
     "base_price": formData.get(`event-price`),
-    "is_favorite": formData.get(`event-favorite`) === `true`,
+    "is_favorite": formData.get(`event-favorite`) === `on`,
 
     "offers": eventTypeStructure.offers.slice().filter((offer) => {
       return selectedOffers.includes(offer.key);
@@ -27222,9 +27222,8 @@ class PointController {
 
     this._routePointEditComponent.setFavoriteButtonClickHandler(() => {
       const newRoutePoint = _models_point_js__WEBPACK_IMPORTED_MODULE_3__["default"].clone(routePoint);
-      newRoutePoint.isFavorite = !newRoutePoint.isFavorite;
-
-      this._onDataChange(this, routePoint, newRoutePoint);
+      newRoutePoint.eventIsFavorite = !newRoutePoint.eventIsFavorite;
+      this._onDataChange(this, routePoint, newRoutePoint, false);
     });
 
     this._routePointEditComponent.setDeleteButtonClickHandler((evt) => {
@@ -27248,6 +27247,15 @@ class PointController {
         }
         break;
       case Mode.ADDING:
+        if (oldRoutePointEditComponent && oldRoutePointComponent) {
+          Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_2__["remove"])(oldRoutePointComponent);
+          Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_2__["remove"])(oldRoutePointEditComponent);
+        }
+        document.addEventListener(`keydown`, this._onEscKeyDown);
+        Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_2__["render"])(this._container, this._routePointEditComponent, _utils_render_js__WEBPACK_IMPORTED_MODULE_2__["RenderPosition"].AFTERBEGIN);
+        this._routePointEditComponent.applyFlatpickr();
+        break;
+      case Mode.EDIT:
         if (oldRoutePointEditComponent && oldRoutePointComponent) {
           Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_2__["remove"])(oldRoutePointComponent);
           Object(_utils_render_js__WEBPACK_IMPORTED_MODULE_2__["remove"])(oldRoutePointEditComponent);
@@ -27488,10 +27496,10 @@ class TripController {
 
       this._api.updateRoutePoint(oldData.id, newData)
         .then((routePointModel) => {
-          const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, routePointModel);
+          const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, newData);
           if (isSuccess) {
+            routePointController.render(routePointModel, _point_js__WEBPACK_IMPORTED_MODULE_6__["Mode"].EDIT);
             if (updateData) {
-              routePointController.render(routePointModel);
               this._onSortTypeChange(this._sortType);
               this._updateRouteInfo();
             }
@@ -27750,18 +27758,18 @@ class Point {
     this.id = data[`id`];
     this.eventStartDate = Date.parse(data[`date_from`]);
     this.eventEndDate = Date.parse(data[`date_to`]);
-    this.eventCoast = data[`base_price`];
+    this.eventCoast = parseInt(data[`base_price`], 10);
 
     this.eventOffers = [];
     data[`offers`].forEach((offer) => {
       this.eventOffers.push({
         name: offer.title,
         key: `event-offer-${offer.title.toLowerCase().replace(/\s/g, `-`)}`,
-        coast: offer.price,
+        coast: parseInt(offer.price, 10),
       });
     });
 
-    this.eventType = data[`type`][0].toUpperCase() + data[`type`].slice(1);
+    this.eventType = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["firstButtonUpCase"])(data[`type`]);
 
     this.eventDestination = {};
     this.eventDestination.name = data[`destination`].name;
@@ -27908,11 +27916,12 @@ class Points {
 /*!*****************************!*\
   !*** ./src/utils/common.js ***!
   \*****************************/
-/*! exports provided: isFutureEvent, isPastEvent, pretextFromEventType, uniqueItems, getRandomBool, getRandomInt, getRandomNumbers, setDateToHTMLFormat, setDateToHHMMFormat, setDateToMonthDDFormat, generateTextDuration, getDatesDuration */
+/*! exports provided: firstButtonUpCase, isFutureEvent, isPastEvent, pretextFromEventType, uniqueItems, getRandomBool, getRandomInt, getRandomNumbers, setDateToHTMLFormat, setDateToHHMMFormat, setDateToMonthDDFormat, generateTextDuration, getDatesDuration */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "firstButtonUpCase", function() { return firstButtonUpCase; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isFutureEvent", function() { return isFutureEvent; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isPastEvent", function() { return isPastEvent; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "pretextFromEventType", function() { return pretextFromEventType; });
@@ -27937,6 +27946,10 @@ const PRETEXT_ACTIVITY = `in`;
 const setZeroAtStart = (number) => {
   const str = number.toString();
   return str.length < 2 ? `0${str}` : str;
+};
+
+const firstButtonUpCase = (string) => {
+  return string[0].toUpperCase() + string.slice(1);
 };
 
 const isFutureEvent = (eventStartDate) => {

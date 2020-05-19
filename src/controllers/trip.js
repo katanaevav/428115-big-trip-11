@@ -4,7 +4,7 @@ import DaysComponent from "../components/days.js";
 import DayComponent from "../components/day.js";
 import {RenderPosition, render, remove} from "../utils/render.js";
 import {getDatesDuration} from "../utils/common.js";
-import PointController, {Mode as RoutePointControllerMode} from "./point.js";
+import PointController, {Mode as RoutePointControllerMode, Mode} from "./point.js";
 
 const getSortedRoutePoints = (routePoints, sortType) => {
   let sortedRoutePoints = [];
@@ -165,9 +165,9 @@ export default class TripController {
 
       this._api.updateRoutePoint(oldData.id, newData)
         .then((routePointModel) => {
-          const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, routePointModel);
+          const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, newData);
           if (isSuccess) {
-            routePointController.render(routePointModel);
+            routePointController.render(routePointModel, Mode.EDIT);
             if (updateData) {
               this._onSortTypeChange(this._sortType);
               this._updateRouteInfo();
