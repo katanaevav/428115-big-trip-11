@@ -158,18 +158,19 @@ export default class TripController {
             this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
             this._onFilterChange();
           });
-
-
-        // this._routePointsModel.addRoutePoint(newData);
-        // routePointController.render(newData, RoutePointControllerMode.DEFAULT);
-        // this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
-        // this._onFilterChange();
       }
     } else if (newData === null) {
 
-      this._routePointsModel.removeRoutePoint(oldData.id);
-      this._updateRoutePoints(this._sortType);
-      this._onSortTypeChange(this._sortType);
+      this._api.deleteRoutePoint(oldData.id)
+        .then(() => {
+          this._routePointsModel.removeRoutePoint(oldData.id);
+          this._updateRoutePoints(this._sortType);
+          this._onSortTypeChange(this._sortType);
+        });
+
+      // this._routePointsModel.removeRoutePoint(oldData.id);
+      // this._updateRoutePoints(this._sortType);
+      // this._onSortTypeChange(this._sortType);
     } else {
 
       this._api.updateRoutePoint(oldData.id, newData)
