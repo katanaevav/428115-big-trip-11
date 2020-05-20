@@ -1,5 +1,5 @@
 import {setDateToHTMLFormat, firstButtonUpCase} from "../utils/common.js";
-// Изменения в module8-task2-a
+
 export default class Point {
   constructor(data) {
     this.id = data.id;
@@ -7,14 +7,11 @@ export default class Point {
     this.eventEndDate = Date.parse(data.date_to);
     this.eventCoast = parseInt(data.base_price, 10);
 
-    this.eventOffers = [];
-    data.offers.forEach((offer) => {
-      this.eventOffers.push({
-        name: offer.title,
-        key: `event-offer-${offer.title.toLowerCase().replace(/\s/g, `-`)}`,
-        coast: parseInt(offer.price, 10),
-      });
-    });
+    this.eventOffers = data.offers.map((offer) => ({
+      name: offer.title,
+      key: `event-offer-${offer.title.toLowerCase().replace(/\s/g, `-`)}`,
+      coast: parseInt(offer.price, 10),
+    }));
 
     this.eventType = firstButtonUpCase(data.type);
 
@@ -27,13 +24,10 @@ export default class Point {
   }
 
   toRAW() {
-    const offers = [];
-    this.eventOffers.map((offer) => {
-      offers.push({
-        title: offer.name,
-        price: offer.coast,
-      });
-    });
+    const offers = this.eventOffers.map((offer) => ({
+      title: offer.name,
+      price: offer.coast,
+    }));
 
     const destination = {};
     destination.description = this.eventDestination.description;

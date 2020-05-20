@@ -7,9 +7,7 @@ import moment from "moment";
 const BAR_HEIGHT = 55;
 
 const getRoutePointsTypeList = (routePoints, eventTypes) => {
-  return uniqueItems(routePoints.map((it) => it.eventType)).map((type) => {
-    return eventTypes.find((it) => it.name.toLowerCase() === type.toLowerCase());
-  });
+  return uniqueItems(routePoints.map((routePoint) => eventTypes.find((it) => it.name.toLowerCase() === routePoint.eventType.toLowerCase())));
 };
 
 const getMoney = (routePointsTypes, routePoints) => {
