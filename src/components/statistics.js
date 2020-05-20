@@ -6,25 +6,25 @@ import moment from "moment";
 
 const BAR_HEIGHT = 55;
 
-const getRoutePointsTypeList = (routePoints) => {
-  return uniqueItems(routePoints.map((it) => it.eventType));
+const getRoutePointsTypeList = (routePoints, eventTypes) => {
+  return uniqueItems(routePoints.map((routePoint) => eventTypes.find((it) => it.name.toLowerCase() === routePoint.eventType.toLowerCase())));
 };
 
 const getMoney = (routePointsTypes, routePoints) => {
   return routePointsTypes.map((type) => routePoints.slice()
-                                          .filter((it) => it.eventType.name === type.name)
+                                          .filter((it) => it.eventType.toLowerCase() === type.name.toLowerCase())
                                           .map((it) => it.eventCoast)
                                           .reduce((previousValue, currentValue) => previousValue + currentValue));
 };
 
 const getTransport = (routePointsTypes, routePoints) => {
   return routePointsTypes.map((type) => routePoints.slice()
-                                          .filter((it) => it.eventType.name === type.name).length);
+                                          .filter((it) => it.eventType.toLowerCase() === type.name.toLowerCase()).length);
 };
 
 const getTimeSpendList = (routePointsTypes, routePoints) => {
   return routePointsTypes.map((type) => routePoints.slice()
-                                          .filter((it) => it.eventType.name === type.name)
+                                          .filter((it) => it.eventType.toLowerCase() === type.name.toLowerCase())
                                           .map((it) => it.eventEndDate - it.eventStartDate)
                                           .reduce((previousValue, currentValue) => previousValue + currentValue));
 };
@@ -265,6 +265,7 @@ export default class Statistic extends AbstractComponent {
     this._timeSpendChart = null;
 
     this._routePoints = null;
+    this._eventTypes = null;
     this._routePointsTypeList = null;
   }
 
@@ -272,13 +273,14 @@ export default class Statistic extends AbstractComponent {
     return createStatisticTemplate();
   }
 
-  getData(routePoints) {
+  getData(routePoints, eventTypes) {
     this._routePoints = routePoints;
+    this._eventTypes = eventTypes;
   }
 
   show() {
     super.show();
-    this._routePointsTypeList = getRoutePointsTypeList(this._routePoints);
+    this._routePointsTypeList = getRoutePointsTypeList(this._routePoints, this._eventTypes);
 
     this.rerender();
   }

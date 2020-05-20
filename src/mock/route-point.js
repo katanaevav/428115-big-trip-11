@@ -29,7 +29,12 @@ const generateDescription = () => {
   return randomText.map((it) => textDescriptions[it]);
 };
 
-const generatePhoto = () => `http://picsum.photos/248/152?r=${Math.random()}`;
+const generatePhoto = () => {
+  return {
+    src: `http://picsum.photos/248/152?r=${Math.random()}`,
+    description: `http://picsum.photos/248/152`,
+  };
+};
 
 const generatePhotos = (count) => {
   return new Array(count)

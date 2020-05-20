@@ -1,5 +1,4 @@
-import {uniqueItems, pretextFromEventType} from "../utils/common.js";
-import {eventTypes, destinations} from "../mock/route-point.js";
+import {uniqueItems, pretextFromEventType, firstButtonUpCase} from "../utils/common.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
@@ -71,16 +70,19 @@ const generateOfferTemplate = (offer, selected) => {
   );
 };
 
-const genearteOfferSection = (selectedEventType, eventOffers) => {
-  const offersTemplate = selectedEventType.offers.map((it) =>
+const genearteOfferSection = (selectedEventType, eventOffers, eventTypes) => {
+  let sectionTemplate = ``;
+
+  const selectedOffer = eventTypes.find((it) => {
+    return it.name.toLowerCase() === selectedEventType.toLowerCase();
+  });
+  const offersTemplate = selectedOffer.offers.map((it) =>
     generateOfferTemplate(it,
         eventOffers.findIndex((selectedOffers) => {
           return it.name === selectedOffers.name;
         }))).join(`\n`);
 
-  let sectionTemplate = ``;
-
-  if (selectedEventType.offers.length > 0) {
+  if (selectedOffer.offers.length > 0) {
     sectionTemplate =
       `<section class="event__section  event__section--offers">
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -95,8 +97,9 @@ const genearteOfferSection = (selectedEventType, eventOffers) => {
 };
 
 const generatePictureTemplate = (picture) => {
+  const {src, descritpion} = picture;
   return (
-    `<img class="event__photo" src="${picture}" alt="Event photo">`
+    `<img class="event__photo" src="${src}" alt="${descritpion}">`
   );
 };
 
@@ -121,9 +124,9 @@ const generateDestinationSection = (selectedEventDestination) => {
   return sectionTemplate;
 };
 
-const generateDetailSection = (selectedEventType, eventOffers, selectedEventDestination) => {
+const generateDetailSection = (selectedEventType, eventOffers, selectedEventDestination, eventTypes) => {
   let sectionTemplate = ``;
-  const offer = genearteOfferSection(selectedEventType, eventOffers);
+  const offer = genearteOfferSection(selectedEventType, eventOffers, eventTypes);
   const destination = generateDestinationSection(selectedEventDestination);
 
   if (offer.length > 0 || destination.length > 0) {
@@ -143,14 +146,15 @@ const generateDestinationTemplate = (destinationName) => {
   );
 };
 
-const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint) => {
+const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint, eventTypes, destinations) => {
   const {eventStartDate, eventEndDate, eventCoast, eventOffers, eventIsFavorite} = routePoint;
   const {selectedEventType, selectedEventDestination} = options;
 
   const destinationList = destinations.map((destination) => generateDestinationTemplate(destination.name)).join(`\n`);
 
-  const eventName = selectedEventType.name;
-  const eventAction = pretextFromEventType(selectedEventType.type);
+  const eventName = firstButtonUpCase(selectedEventType);
+
+  const eventAction = pretextFromEventType(eventTypes.find((it) => it.name.toLowerCase() === selectedEventType.toLowerCase()).type);
 
   const resetButtonCaption = isNewRoutePoint ? ResetButtonCaptions.NEW_ROUTE_POINT : ResetButtonCaptions.EDIT_ROUTE_POINT;
   const destination = selectedEventDestination.name;
@@ -210,41 +214,15 @@ const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint)
 
         </header>
 
-        ${generateDetailSection(selectedEventType, eventOffers, selectedEventDestination)}
+        ${generateDetailSection(selectedEventType, eventOffers, selectedEventDestination, eventTypes)}
 
       </form>
     </li>`
   );
 };
 
-const parseFormData = (formData, eventTypeData) => {
-  let selectedOffers = [];
-  for (let key of formData.keys()) {
-    if (key.startsWith(`event-offer`)) {
-      selectedOffers.push(key.substring(12));
-    }
-  }
-
-  const selectedDestination = destinations.find(((destination) => {
-    return destination.name === formData.get(`event-destination`);
-  }));
-
-  return {
-    id: formData.get(`event-id`),
-    eventType: eventTypeData,
-    eventDestination: selectedDestination,
-    eventStartDate: Date.parse(formData.get(`event-start-time`)),
-    eventEndDate: Date.parse(formData.get(`event-end-time`)),
-    eventCoast: parseInt(formData.get(`event-price`), 10),
-    eventOffers: eventTypeData.offers.slice().filter((offer) => {
-      return selectedOffers.includes(offer.key);
-    }),
-    eventIsFavorite: formData.get(`event-favorite`) === `true`,
-  };
-};
-
 export default class RoutePoint extends AbstractSmartComponent {
-  constructor(routePoint, isNew = false) {
+  constructor(routePoint, isNew = false, offersList, destinationsList) {
     super();
 
     this._eventType = routePoint.eventType;
@@ -259,7 +237,10 @@ export default class RoutePoint extends AbstractSmartComponent {
     this._flatpickrEnd = null;
     this._deleteButtonClickHandler = null;
 
-    this._subscribeOnEvents();
+    this._offersList = offersList;
+    this._destinationsList = destinationsList;
+
+    this._subscribeOnEvents(this._offersList, this._destinationsList);
   }
 
   reset() {
@@ -275,7 +256,7 @@ export default class RoutePoint extends AbstractSmartComponent {
     return createRoutePointEditTemplate(this._routePoint, {
       selectedEventType: this._eventType,
       selectedEventDestination: this._eventDestination,
-    }, this._isNewRoutePoint);
+    }, this._isNewRoutePoint, this._offersList, this._destinationsList);
   }
 
   removeElement() {
@@ -301,7 +282,7 @@ export default class RoutePoint extends AbstractSmartComponent {
     }
     this.setDeleteButtonClickHandler(this._deleteButtonClickHandler);
 
-    this._subscribeOnEvents();
+    this._subscribeOnEvents(this._offersList, this._destinationsList);
   }
 
   rerender() {
@@ -314,8 +295,9 @@ export default class RoutePoint extends AbstractSmartComponent {
     const formData = new FormData(form);
     formData.append(`event-favorite`, this._routePoint.eventIsFavorite);
     formData.append(`event-id`, this._routePoint.id);
+    formData.append(`event-type-data`, this._eventType);
 
-    return parseFormData(formData, this._eventType);
+    return formData;
   }
 
   setSubmitHandler(handler) {
@@ -369,7 +351,7 @@ export default class RoutePoint extends AbstractSmartComponent {
     });
   }
 
-  _subscribeOnEvents() {
+  _subscribeOnEvents(eventTypes, destinations) {
     const element = this.getElement();
 
     element.querySelector(`.event__input--price`)
@@ -409,7 +391,8 @@ export default class RoutePoint extends AbstractSmartComponent {
           const selectedEventType = eventTypes.find((eventType) => {
             return evt.target.value === eventType.name.toLowerCase();
           });
-          this._eventType = selectedEventType;
+
+          this._eventType = selectedEventType.name.toLowerCase();
 
           this.rerender();
         }

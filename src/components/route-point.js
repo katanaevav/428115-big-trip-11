@@ -16,11 +16,10 @@ const generateOfferTemplate = (offer) => {
   );
 };
 
-const createRoutePointTemplate = (routePoint) => {
+const createRoutePointTemplate = (routePoint, eventTypes) => {
   const {eventStartDate, eventEndDate, eventCoast, eventOffers, eventType, eventDestination} = routePoint;
 
-  const eventName = eventType.name;
-  const eventAction = pretextFromEventType(eventType.type);
+  const eventAction = pretextFromEventType(eventTypes.find((it) => it.name.toLowerCase() === eventType.toLowerCase()).type);
 
   const destination = eventDestination.name;
 
@@ -32,9 +31,9 @@ const createRoutePointTemplate = (routePoint) => {
     `<li class="trip-events__item">
       <div class="event">
         <div class="event__type">
-          <img class="event__type-icon" width="42" height="42" src="img/icons/${eventName.toLowerCase()}.png" alt="Event type icon">
+          <img class="event__type-icon" width="42" height="42" src="img/icons/${eventType.toLowerCase()}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${eventName} ${eventAction} ${destination}</h3>
+        <h3 class="event__title">${eventType} ${eventAction} ${destination}</h3>
 
         <div class="event__schedule">
           <p class="event__time">
@@ -63,14 +62,15 @@ const createRoutePointTemplate = (routePoint) => {
 };
 
 export default class RoutePoint extends AbstractComponent {
-  constructor(routePoint) {
+  constructor(routePoint, eventTypes) {
     super();
 
     this._routePoint = routePoint;
+    this._eventTypes = eventTypes;
   }
 
   getTemplate() {
-    return createRoutePointTemplate(this._routePoint);
+    return createRoutePointTemplate(this._routePoint, this._eventTypes);
   }
 
   setRollupButtonClickHandler(handler) {

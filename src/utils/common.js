@@ -10,6 +10,10 @@ const setZeroAtStart = (number) => {
   return str.length < 2 ? `0${str}` : str;
 };
 
+export const firstButtonUpCase = (string) => {
+  return string[0].toUpperCase() + string.slice(1);
+};
+
 export const isFutureEvent = (eventStartDate) => {
   return eventStartDate > Date.now();
 };

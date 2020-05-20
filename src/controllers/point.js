@@ -1,7 +1,7 @@
 import RoutePointComponent from "../components/route-point.js";
 import RoutePointEditComponent from "../components/route-point-edit.js";
 import {RenderPosition, render, remove, replace} from "../utils/render.js";
-import {eventTypes, destinations} from "../mock/route-point.js";
+import RoutePointModel from "../models/point.js";
 
 const FIRST_ELEMENT = 0;
 
@@ -11,22 +11,54 @@ export const Mode = {
   ADDING: `adding`,
 };
 
-export const EmptyRoutePoint = {
-  id: Date.now(),
-  eventStartDate: Date.now(),
-  eventEndDate: Date.now(),
-  eventCoast: 0,
-  eventOffers: [],
-  eventType: eventTypes[FIRST_ELEMENT],
-  eventDestination: destinations[FIRST_ELEMENT],
-  eventIsFavorite: false,
+const parseFormData = (formData, eventTypes, destinations) => {
+  let selectedOffers = [];
+  for (let key of formData.keys()) {
+    if (key.startsWith(`event-offer`)) {
+      selectedOffers.push(key.substring(12));
+    }
+  }
+  const eventTypeStructure = eventTypes.find((it) => it.name.toLowerCase() === formData.get(`event-type-data`).toLowerCase());
+
+  let selectedDestination = {};
+
+  const destination = destinations.find(((it) => {
+    return it.name === formData.get(`event-destination`);
+  }));
+  selectedDestination.name = destination.name;
+  selectedDestination.description = destination.description;
+  selectedDestination.pictures = destination.photos;
+
+  const routePointModel = new RoutePointModel({
+    "id": formData.get(`event-id`),
+    "date_from": (formData.get(`event-start-time`)),
+    "date_to": (formData.get(`event-end-time`)),
+    "base_price": formData.get(`event-price`),
+    "is_favorite": formData.get(`event-favorite`) === `on`,
+
+    "offers": eventTypeStructure.offers.filter((offer) => {
+      return selectedOffers.includes(offer.key);
+    }).map((it) => ({
+      title: it.name,
+      price: it.coast,
+      key: it.key,
+    })),
+
+    "destination": selectedDestination,
+    "type": formData.get(`event-type-data`),
+  });
+
+  return routePointModel;
 };
 
 export default class PointController {
-  constructor(container, onDataChange, onViewChange) {
+  constructor(container, onDataChange, onViewChange, offersList, destinationsList) {
     this._container = container;
     this._onDataChange = onDataChange;
     this._onViewChange = onViewChange;
+
+    this._offersList = offersList;
+    this._destinationsList = destinationsList;
 
     this._mode = Mode.DEFAULT;
     this._routePointComponent = null;
@@ -37,13 +69,26 @@ export default class PointController {
     this._openRoutePointEditForm = this._openRoutePointEditForm.bind(this);
   }
 
+  static getEmptyRoutePoint(offersList, destinationsList) {
+    return {
+      id: Date.now(),
+      eventStartDate: Date.now(),
+      eventEndDate: Date.now(),
+      eventCoast: 0,
+      eventOffers: [],
+      eventType: offersList[FIRST_ELEMENT].name,
+      eventDestination: destinationsList[FIRST_ELEMENT],
+      eventIsFavorite: false,
+    };
+  }
+
   render(routePoint, mode = Mode.DEFAULT) {
     const oldRoutePointComponent = this._routePointComponent;
     const oldRoutePointEditComponent = this._routePointEditComponent;
     this._mode = mode;
 
-    this._routePointComponent = new RoutePointComponent(routePoint);
-    this._routePointEditComponent = new RoutePointEditComponent(routePoint, this._mode === Mode.ADDING);
+    this._routePointComponent = new RoutePointComponent(routePoint, this._offersList);
+    this._routePointEditComponent = new RoutePointEditComponent(routePoint, this._mode === Mode.ADDING, this._offersList, this._destinationsList);
 
     this._routePointComponent.setRollupButtonClickHandler(() => {
       this._openRoutePointEditForm();
@@ -52,11 +97,12 @@ export default class PointController {
 
     this._routePointEditComponent.setSubmitHandler((evt) => {
       evt.preventDefault();
-      const editedRoutePoint = this._routePointEditComponent.getData();
-      this._onDataChange(this, routePoint, editedRoutePoint);
+
+      const formData = this._routePointEditComponent.getData();
+      const data = parseFormData(formData, this._offersList, this._destinationsList);
+      this._onDataChange(this, routePoint, data);
       document.removeEventListener(`keydown`, this._onEscKeyDown);
       this._colseRoutePointEditForm();
-
     });
 
     this._routePointEditComponent.setResetHandler((evt) => {
@@ -72,14 +118,17 @@ export default class PointController {
     });
 
     this._routePointEditComponent.setFavoriteButtonClickHandler(() => {
-      this._onDataChange(this, routePoint, Object.assign({}, routePoint, {
-        eventIsFavorite: !routePoint.eventIsFavorite,
-      }), false);
+      const newRoutePoint = RoutePointModel.clone(routePoint);
+      newRoutePoint.eventIsFavorite = !newRoutePoint.eventIsFavorite;
+      this._onDataChange(this, routePoint, newRoutePoint, false);
     });
 
     this._routePointEditComponent.setDeleteButtonClickHandler((evt) => {
       evt.preventDefault();
       this._onDataChange(this, routePoint, null);
+      if (mode === Mode.ADDING) {
+        this._onViewChange();
+      }
     });
 
     switch (mode) {
@@ -95,6 +144,15 @@ export default class PointController {
         }
         break;
       case Mode.ADDING:
+        if (oldRoutePointEditComponent && oldRoutePointComponent) {
+          remove(oldRoutePointComponent);
+          remove(oldRoutePointEditComponent);
+        }
+        document.addEventListener(`keydown`, this._onEscKeyDown);
+        render(this._container, this._routePointEditComponent, RenderPosition.AFTERBEGIN);
+        this._routePointEditComponent.applyFlatpickr();
+        break;
+      case Mode.EDIT:
         if (oldRoutePointEditComponent && oldRoutePointComponent) {
           remove(oldRoutePointComponent);
           remove(oldRoutePointEditComponent);
@@ -139,7 +197,7 @@ export default class PointController {
 
     if (isEscKey) {
       if (this._mode === Mode.ADDING) {
-        this._onDataChange(this, EmptyRoutePoint, null);
+        this._onDataChange(this, this.getEmptyRoutePoint(this._offersList, this._destinationsList), null);
       }
       this._colseRoutePointEditForm();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
