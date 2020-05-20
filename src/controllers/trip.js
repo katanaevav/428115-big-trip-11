@@ -145,22 +145,32 @@ export default class TripController {
   }
 
   _onDataChange(routePointController, oldData, newData, updateData = true) {
-    if (oldData === PointController.getEmptyRoutePoint(this._offersList, this._destinationsList)) {
+    if (oldData.id === null) {
       this._creatingRoutePoint = null;
       if (newData === null) {
         routePointController.destroy();
         this._updateRoutePoints();
       } else {
-        this._routePointsModel.addRoutePoint(newData);
-        routePointController.render(newData, RoutePointControllerMode.DEFAULT);
-        this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
-        this._onFilterChange();
+        this._api.createRoutePoint(newData)
+          .then((routePointModel) => {
+            this._routePointsModel.addRoutePoint(routePointModel);
+            routePointController.render(routePointModel, RoutePointControllerMode.DEFAULT);
+            this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
+            this._onFilterChange();
+          });
       }
     } else if (newData === null) {
 
-      this._routePointsModel.removeRoutePoint(oldData.id);
-      this._updateRoutePoints(this._sortType);
-      this._onSortTypeChange(this._sortType);
+      this._api.deleteRoutePoint(oldData.id)
+        .then(() => {
+          this._routePointsModel.removeRoutePoint(oldData.id);
+          this._updateRoutePoints(this._sortType);
+          this._onSortTypeChange(this._sortType);
+        });
+
+      // this._routePointsModel.removeRoutePoint(oldData.id);
+      // this._updateRoutePoints(this._sortType);
+      // this._onSortTypeChange(this._sortType);
     } else {
 
       this._api.updateRoutePoint(oldData.id, newData)

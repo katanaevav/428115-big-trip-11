@@ -71,7 +71,7 @@ export default class PointController {
 
   static getEmptyRoutePoint(offersList, destinationsList) {
     return {
-      id: Date.now(),
+      id: null,
       eventStartDate: Date.now(),
       eventEndDate: Date.now(),
       eventCoast: 0,
