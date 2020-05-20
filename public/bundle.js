@@ -26007,30 +26007,26 @@ const generateOfferTemplate = (offer, selected) => {
 };
 
 const genearteOfferSection = (selectedEventType, eventOffers, eventTypes) => {
-  const offerIndex = eventTypes.findIndex((it) => {
-    return it.name.toLowerCase() === selectedEventType.toLowerCase();
-  });
-
   let sectionTemplate = ``;
 
-  if (offerIndex > -1) {
-    const selectedOffer = eventTypes[offerIndex];
-    const offersTemplate = selectedOffer.offers.map((it) =>
-      generateOfferTemplate(it,
-          eventOffers.findIndex((selectedOffers) => {
-            return it.name === selectedOffers.name;
-          }))).join(`\n`);
+  const selectedOffer = eventTypes.find((it) => {
+    return it.name.toLowerCase() === selectedEventType.toLowerCase();
+  });
+  const offersTemplate = selectedOffer.offers.map((it) =>
+    generateOfferTemplate(it,
+        eventOffers.findIndex((selectedOffers) => {
+          return it.name === selectedOffers.name;
+        }))).join(`\n`);
 
-    if (selectedOffer.offers.length > 0) {
-      sectionTemplate =
-        `<section class="event__section  event__section--offers">
-          <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+  if (selectedOffer.offers.length > 0) {
+    sectionTemplate =
+      `<section class="event__section  event__section--offers">
+        <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
-          <div class="event__available-offers">
-            ${offersTemplate}
-          </div>
-        </section>`;
-    }
+        <div class="event__available-offers">
+          ${offersTemplate}
+        </div>
+      </section>`;
   }
 
   return sectionTemplate;
@@ -26094,9 +26090,7 @@ const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint,
 
   const eventName = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["firstButtonUpCase"])(selectedEventType);
 
-
-  const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === selectedEventType.toLowerCase());
-  const eventAction = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["pretextFromEventType"])(eventTypes[eventTypeIndex].type);
+  const eventAction = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["pretextFromEventType"])(eventTypes.find((it) => it.name.toLowerCase() === selectedEventType.toLowerCase()).type);
 
   const resetButtonCaption = isNewRoutePoint ? ResetButtonCaptions.NEW_ROUTE_POINT : ResetButtonCaptions.EDIT_ROUTE_POINT;
   const destination = selectedEventDestination.name;
@@ -26424,10 +26418,7 @@ const generateOfferTemplate = (offer) => {
 const createRoutePointTemplate = (routePoint, eventTypes) => {
   const {eventStartDate, eventEndDate, eventCoast, eventOffers, eventType, eventDestination} = routePoint;
 
-  const eventName = eventType;
-
-  const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === eventType.toLowerCase());
-  const eventAction = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["pretextFromEventType"])(eventTypes[eventTypeIndex].type);
+  const eventAction = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["pretextFromEventType"])(eventTypes.find((it) => it.name.toLowerCase() === eventType.toLowerCase()).type);
 
   const destination = eventDestination.name;
 
@@ -26439,9 +26430,9 @@ const createRoutePointTemplate = (routePoint, eventTypes) => {
     `<li class="trip-events__item">
       <div class="event">
         <div class="event__type">
-          <img class="event__type-icon" width="42" height="42" src="img/icons/${eventName.toLowerCase()}.png" alt="Event type icon">
+          <img class="event__type-icon" width="42" height="42" src="img/icons/${eventType.toLowerCase()}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${eventName} ${eventAction} ${destination}</h3>
+        <h3 class="event__title">${eventType} ${eventAction} ${destination}</h3>
 
         <div class="event__schedule">
           <p class="event__time">
@@ -26612,8 +26603,7 @@ const BAR_HEIGHT = 55;
 
 const getRoutePointsTypeList = (routePoints, eventTypes) => {
   return Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["uniqueItems"])(routePoints.map((it) => it.eventType)).map((type) => {
-    const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === type.toLowerCase());
-    return eventTypes[eventTypeIndex];
+    return eventTypes.find((it) => it.name.toLowerCase() === type.toLowerCase());
   });
 };
 
@@ -27120,17 +27110,16 @@ const parseFormData = (formData, eventTypes, destinations) => {
       selectedOffers.push(key.substring(12));
     }
   }
-  const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === formData.get(`event-type-data`).toLowerCase());
-  const eventTypeStructure = eventTypes[eventTypeIndex];
+  const eventTypeStructure = eventTypes.find((it) => it.name.toLowerCase() === formData.get(`event-type-data`).toLowerCase());
 
   let selectedDestination = {};
-  const destinationIndex = destinations.findIndex(((destination) => {
-    return destination.name === formData.get(`event-destination`);
-  }));
 
-  selectedDestination.name = destinations[destinationIndex].name;
-  selectedDestination.description = destinations[destinationIndex].description;
-  selectedDestination.pictures = destinations[destinationIndex].photos;
+  const destination = destinations.find(((it) => {
+    return it.name === formData.get(`event-destination`);
+  }));
+  selectedDestination.name = destination.name;
+  selectedDestination.description = destination.description;
+  selectedDestination.pictures = destination.photos;
 
   const routePointModel = new _models_point_js__WEBPACK_IMPORTED_MODULE_3__["default"]({
     "id": formData.get(`event-id`),
@@ -27139,7 +27128,7 @@ const parseFormData = (formData, eventTypes, destinations) => {
     "base_price": formData.get(`event-price`),
     "is_favorite": formData.get(`event-favorite`) === `on`,
 
-    "offers": eventTypeStructure.offers.slice().filter((offer) => {
+    "offers": eventTypeStructure.offers.filter((offer) => {
       return selectedOffers.includes(offer.key);
     }).map((it) => ({
       title: it.name,
@@ -27680,9 +27669,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Destination; });
 class Destination {
   constructor(data) {
-    this.name = data[`name`];
-    this.description = data[`description`];
-    this.photos = data[`pictures`];
+    this.name = data.name;
+    this.description = data.description;
+    this.photos = data.pictures;
   }
 
   static parseDestination(data) {
@@ -27716,10 +27705,10 @@ const ACTIVITIES = [`Check-in`, `Sightseeing`, `Restaurant`];
 
 class Offer {
   constructor(data) {
-    this.name = data[`type`];
-    this.type = ACTIVITIES.findIndex((it) => it.toLowerCase() === data[`type`]) < 0 ? EventTypes.TRANSFER : EventTypes.ACTIVITY;
+    this.name = data.type;
+    this.type = ACTIVITIES.some((it) => it.toLowerCase() === data.type) ? EventTypes.ACTIVITY : EventTypes.TRANSFER;
     this.offers = [];
-    data[`offers`].forEach((offer) => {
+    data.offers.forEach((offer) => {
       this.offers.push({
         name: offer.title,
         key: `event-offer-${offer.title.toLowerCase().replace(/\s/g, `-`)}`,
@@ -27755,13 +27744,13 @@ __webpack_require__.r(__webpack_exports__);
 
 class Point {
   constructor(data) {
-    this.id = data[`id`];
-    this.eventStartDate = Date.parse(data[`date_from`]);
-    this.eventEndDate = Date.parse(data[`date_to`]);
-    this.eventCoast = parseInt(data[`base_price`], 10);
+    this.id = data.id;
+    this.eventStartDate = Date.parse(data.date_from);
+    this.eventEndDate = Date.parse(data.date_to);
+    this.eventCoast = parseInt(data.base_price, 10);
 
     this.eventOffers = [];
-    data[`offers`].forEach((offer) => {
+    data.offers.forEach((offer) => {
       this.eventOffers.push({
         name: offer.title,
         key: `event-offer-${offer.title.toLowerCase().replace(/\s/g, `-`)}`,
@@ -27769,19 +27758,19 @@ class Point {
       });
     });
 
-    this.eventType = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["firstButtonUpCase"])(data[`type`]);
+    this.eventType = Object(_utils_common_js__WEBPACK_IMPORTED_MODULE_0__["firstButtonUpCase"])(data.type);
 
     this.eventDestination = {};
-    this.eventDestination.name = data[`destination`].name;
-    this.eventDestination.description = data[`destination`].description;
-    this.eventDestination.photos = data[`destination`].pictures;
+    this.eventDestination.name = data.destination.name;
+    this.eventDestination.description = data.destination.description;
+    this.eventDestination.photos = data.destination.pictures;
 
-    this.eventIsFavorite = data[`is_favorite`];
+    this.eventIsFavorite = data.is_favorite;
   }
 
   toRAW() {
     const offers = [];
-    this.eventOffers.forEach((offer) => {
+    this.eventOffers.map((offer) => {
       offers.push({
         title: offer.name,
         price: offer.coast,

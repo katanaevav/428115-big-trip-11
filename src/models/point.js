@@ -2,13 +2,13 @@ import {setDateToHTMLFormat, firstButtonUpCase} from "../utils/common.js";
 
 export default class Point {
   constructor(data) {
-    this.id = data[`id`];
-    this.eventStartDate = Date.parse(data[`date_from`]);
-    this.eventEndDate = Date.parse(data[`date_to`]);
-    this.eventCoast = parseInt(data[`base_price`], 10);
+    this.id = data.id;
+    this.eventStartDate = Date.parse(data.date_from);
+    this.eventEndDate = Date.parse(data.date_to);
+    this.eventCoast = parseInt(data.base_price, 10);
 
     this.eventOffers = [];
-    data[`offers`].forEach((offer) => {
+    data.offers.forEach((offer) => {
       this.eventOffers.push({
         name: offer.title,
         key: `event-offer-${offer.title.toLowerCase().replace(/\s/g, `-`)}`,
@@ -16,19 +16,19 @@ export default class Point {
       });
     });
 
-    this.eventType = firstButtonUpCase(data[`type`]);
+    this.eventType = firstButtonUpCase(data.type);
 
     this.eventDestination = {};
-    this.eventDestination.name = data[`destination`].name;
-    this.eventDestination.description = data[`destination`].description;
-    this.eventDestination.photos = data[`destination`].pictures;
+    this.eventDestination.name = data.destination.name;
+    this.eventDestination.description = data.destination.description;
+    this.eventDestination.photos = data.destination.pictures;
 
-    this.eventIsFavorite = data[`is_favorite`];
+    this.eventIsFavorite = data.is_favorite;
   }
 
   toRAW() {
     const offers = [];
-    this.eventOffers.forEach((offer) => {
+    this.eventOffers.map((offer) => {
       offers.push({
         title: offer.name,
         price: offer.coast,

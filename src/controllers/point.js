@@ -18,17 +18,16 @@ const parseFormData = (formData, eventTypes, destinations) => {
       selectedOffers.push(key.substring(12));
     }
   }
-  const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === formData.get(`event-type-data`).toLowerCase());
-  const eventTypeStructure = eventTypes[eventTypeIndex];
+  const eventTypeStructure = eventTypes.find((it) => it.name.toLowerCase() === formData.get(`event-type-data`).toLowerCase());
 
   let selectedDestination = {};
-  const destinationIndex = destinations.findIndex(((destination) => {
-    return destination.name === formData.get(`event-destination`);
-  }));
 
-  selectedDestination.name = destinations[destinationIndex].name;
-  selectedDestination.description = destinations[destinationIndex].description;
-  selectedDestination.pictures = destinations[destinationIndex].photos;
+  const destination = destinations.find(((it) => {
+    return it.name === formData.get(`event-destination`);
+  }));
+  selectedDestination.name = destination.name;
+  selectedDestination.description = destination.description;
+  selectedDestination.pictures = destination.photos;
 
   const routePointModel = new RoutePointModel({
     "id": formData.get(`event-id`),
@@ -37,7 +36,7 @@ const parseFormData = (formData, eventTypes, destinations) => {
     "base_price": formData.get(`event-price`),
     "is_favorite": formData.get(`event-favorite`) === `on`,
 
-    "offers": eventTypeStructure.offers.slice().filter((offer) => {
+    "offers": eventTypeStructure.offers.filter((offer) => {
       return selectedOffers.includes(offer.key);
     }).map((it) => ({
       title: it.name,

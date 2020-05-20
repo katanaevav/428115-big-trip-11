@@ -71,30 +71,26 @@ const generateOfferTemplate = (offer, selected) => {
 };
 
 const genearteOfferSection = (selectedEventType, eventOffers, eventTypes) => {
-  const offerIndex = eventTypes.findIndex((it) => {
-    return it.name.toLowerCase() === selectedEventType.toLowerCase();
-  });
-
   let sectionTemplate = ``;
 
-  if (offerIndex > -1) {
-    const selectedOffer = eventTypes[offerIndex];
-    const offersTemplate = selectedOffer.offers.map((it) =>
-      generateOfferTemplate(it,
-          eventOffers.findIndex((selectedOffers) => {
-            return it.name === selectedOffers.name;
-          }))).join(`\n`);
+  const selectedOffer = eventTypes.find((it) => {
+    return it.name.toLowerCase() === selectedEventType.toLowerCase();
+  });
+  const offersTemplate = selectedOffer.offers.map((it) =>
+    generateOfferTemplate(it,
+        eventOffers.findIndex((selectedOffers) => {
+          return it.name === selectedOffers.name;
+        }))).join(`\n`);
 
-    if (selectedOffer.offers.length > 0) {
-      sectionTemplate =
-        `<section class="event__section  event__section--offers">
-          <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+  if (selectedOffer.offers.length > 0) {
+    sectionTemplate =
+      `<section class="event__section  event__section--offers">
+        <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
-          <div class="event__available-offers">
-            ${offersTemplate}
-          </div>
-        </section>`;
-    }
+        <div class="event__available-offers">
+          ${offersTemplate}
+        </div>
+      </section>`;
   }
 
   return sectionTemplate;
@@ -158,9 +154,7 @@ const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint,
 
   const eventName = firstButtonUpCase(selectedEventType);
 
-
-  const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === selectedEventType.toLowerCase());
-  const eventAction = pretextFromEventType(eventTypes[eventTypeIndex].type);
+  const eventAction = pretextFromEventType(eventTypes.find((it) => it.name.toLowerCase() === selectedEventType.toLowerCase()).type);
 
   const resetButtonCaption = isNewRoutePoint ? ResetButtonCaptions.NEW_ROUTE_POINT : ResetButtonCaptions.EDIT_ROUTE_POINT;
   const destination = selectedEventDestination.name;

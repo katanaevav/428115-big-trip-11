@@ -19,10 +19,7 @@ const generateOfferTemplate = (offer) => {
 const createRoutePointTemplate = (routePoint, eventTypes) => {
   const {eventStartDate, eventEndDate, eventCoast, eventOffers, eventType, eventDestination} = routePoint;
 
-  const eventName = eventType;
-
-  const eventTypeIndex = eventTypes.findIndex((it) => it.name.toLowerCase() === eventType.toLowerCase());
-  const eventAction = pretextFromEventType(eventTypes[eventTypeIndex].type);
+  const eventAction = pretextFromEventType(eventTypes.find((it) => it.name.toLowerCase() === eventType.toLowerCase()).type);
 
   const destination = eventDestination.name;
 
@@ -34,9 +31,9 @@ const createRoutePointTemplate = (routePoint, eventTypes) => {
     `<li class="trip-events__item">
       <div class="event">
         <div class="event__type">
-          <img class="event__type-icon" width="42" height="42" src="img/icons/${eventName.toLowerCase()}.png" alt="Event type icon">
+          <img class="event__type-icon" width="42" height="42" src="img/icons/${eventType.toLowerCase()}.png" alt="Event type icon">
         </div>
-        <h3 class="event__title">${eventName} ${eventAction} ${destination}</h3>
+        <h3 class="event__title">${eventType} ${eventAction} ${destination}</h3>
 
         <div class="event__schedule">
           <p class="event__time">
