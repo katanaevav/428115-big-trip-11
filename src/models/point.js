@@ -1,5 +1,5 @@
 import {setDateToHTMLFormat, firstButtonUpCase} from "../utils/common.js";
-// Изменения в module8-task2-a
+
 export default class Point {
   constructor(data) {
     this.id = data.id;
