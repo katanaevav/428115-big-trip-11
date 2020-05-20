@@ -4,6 +4,7 @@ import {RenderPosition, render, remove, replace} from "../utils/render.js";
 import RoutePointModel from "../models/point.js";
 
 const FIRST_ELEMENT = 0;
+const SHAKE_ANIMATION_TIMEOUT = 600;
 
 export const Mode = {
   DEFAULT: `default`,
@@ -174,6 +175,20 @@ export default class PointController {
     remove(this._routePointEditComponent);
     remove(this._routePointComponent);
     document.removeEventListener(`keydown`, this._onEscKeyDown);
+  }
+
+  shake() {
+    this._routePointEditComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    this._routePointComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    this._routePointEditComponent.getElement().style.border = `3px solid red`;
+    this._routePointComponent.getElement().style.border = `3px solid red`;
+
+    setTimeout(() => {
+      this._routePointEditComponent.getElement().style.animation = ``;
+      this._routePointComponent.getElement().style.animation = ``;
+      this._routePointEditComponent.getElement().style.border = `none`;
+      this._routePointComponent.getElement().style.border = `none`;
+    }, SHAKE_ANIMATION_TIMEOUT);
   }
 
   _colseRoutePointEditForm() {

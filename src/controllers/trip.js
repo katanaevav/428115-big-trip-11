@@ -157,6 +157,9 @@ export default class TripController {
             routePointController.render(routePointModel, RoutePointControllerMode.DEFAULT);
             this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
             this._onFilterChange();
+          })
+          .catch(() => {
+            routePointController.shake();
           });
       }
     } else if (newData === null) {
@@ -166,11 +169,10 @@ export default class TripController {
           this._routePointsModel.removeRoutePoint(oldData.id);
           this._updateRoutePoints(this._sortType);
           this._onSortTypeChange(this._sortType);
+        })
+        .catch(() => {
+          routePointController.shake();
         });
-
-      // this._routePointsModel.removeRoutePoint(oldData.id);
-      // this._updateRoutePoints(this._sortType);
-      // this._onSortTypeChange(this._sortType);
     } else {
 
       this._api.updateRoutePoint(oldData.id, newData)
@@ -183,6 +185,9 @@ export default class TripController {
               this._updateRouteInfo();
             }
           }
+        })
+        .catch(() => {
+          routePointController.shake();
         });
     }
   }
