@@ -157,11 +157,13 @@ export default class TripController {
             routePointController.render(routePointModel, RoutePointControllerMode.DEFAULT);
             this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
             this._onFilterChange();
+            routePointController.enableForm();
             routePointController.resetButtonTexts();
             routePointController.colseRoutePointEditForm();
           })
           .catch(() => {
             routePointController.shake();
+            routePointController.enableForm();
             routePointController.resetButtonTexts();
           });
       }
@@ -175,6 +177,7 @@ export default class TripController {
         })
         .catch(() => {
           routePointController.shake();
+          routePointController.enableForm();
           routePointController.resetButtonTexts();
         });
     } else {
@@ -189,11 +192,13 @@ export default class TripController {
               this._updateRouteInfo();
               routePointController.colseRoutePointEditForm();
             }
+            routePointController.enableForm();
             routePointController.resetButtonTexts();
           }
         })
         .catch(() => {
           routePointController.shake();
+          routePointController.enableForm();
           routePointController.resetButtonTexts();
         });
     }

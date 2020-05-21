@@ -101,6 +101,7 @@ export default class PointController {
       this._routePointEditComponent.setSubmitButtonText(mode === Mode.ADDING, true);
       const formData = this._routePointEditComponent.getData();
       const data = parseFormData(formData, this._offersList, this._destinationsList);
+      this.disableForm();
       this._onDataChange(this, routePoint, data);
       document.removeEventListener(`keydown`, this._onEscKeyDown);
     });
@@ -120,12 +121,14 @@ export default class PointController {
     this._routePointEditComponent.setFavoriteButtonClickHandler(() => {
       const newRoutePoint = RoutePointModel.clone(routePoint);
       newRoutePoint.eventIsFavorite = !newRoutePoint.eventIsFavorite;
+      this.disableForm();
       this._onDataChange(this, routePoint, newRoutePoint, false);
     });
 
     this._routePointEditComponent.setDeleteButtonClickHandler((evt) => {
       evt.preventDefault();
       this._routePointEditComponent.setResetButtonText(mode === Mode.ADDING, true);
+      this.disableForm();
       this._onDataChange(this, routePoint, null);
       if (mode === Mode.ADDING) {
         this._onViewChange();
@@ -174,6 +177,14 @@ export default class PointController {
   resetButtonTexts() {
     this._routePointEditComponent.setResetButtonText(this._mode === Mode.ADDING, false);
     this._routePointEditComponent.setSubmitButtonText(this._mode === Mode.ADDING, false);
+  }
+
+  disableForm() {
+    this._routePointEditComponent.setDisableForm(true);
+  }
+
+  enableForm() {
+    this._routePointEditComponent.setDisableForm(false);
   }
 
   destroy() {
