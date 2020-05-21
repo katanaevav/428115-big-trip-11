@@ -180,6 +180,8 @@ export default class PointController {
   }
 
   disableForm() {
+    this._routePointEditComponent.getElement().style.border = `none`;
+    this._routePointComponent.getElement().style.border = `none`;
     this._routePointEditComponent.setDisableForm(true);
   }
 
@@ -202,8 +204,6 @@ export default class PointController {
     setTimeout(() => {
       this._routePointEditComponent.getElement().style.animation = ``;
       this._routePointComponent.getElement().style.animation = ``;
-      this._routePointEditComponent.getElement().style.border = `none`;
-      this._routePointComponent.getElement().style.border = `none`;
     }, SHAKE_ANIMATION_TIMEOUT);
   }
 
