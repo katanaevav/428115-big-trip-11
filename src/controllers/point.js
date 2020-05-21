@@ -66,7 +66,7 @@ export default class PointController {
     this._routePointEditComponent = null;
 
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
-    this._colseRoutePointEditForm = this._colseRoutePointEditForm.bind(this);
+    this.colseRoutePointEditForm = this.colseRoutePointEditForm.bind(this);
     this._openRoutePointEditForm = this._openRoutePointEditForm.bind(this);
   }
 
@@ -98,23 +98,22 @@ export default class PointController {
 
     this._routePointEditComponent.setSubmitHandler((evt) => {
       evt.preventDefault();
-
+      this._routePointEditComponent.setSubmitButtonText(mode === Mode.ADDING, true);
       const formData = this._routePointEditComponent.getData();
       const data = parseFormData(formData, this._offersList, this._destinationsList);
       this._onDataChange(this, routePoint, data);
       document.removeEventListener(`keydown`, this._onEscKeyDown);
-      this._colseRoutePointEditForm();
     });
 
     this._routePointEditComponent.setResetHandler((evt) => {
       evt.preventDefault();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
-      this._colseRoutePointEditForm();
+      this.colseRoutePointEditForm();
     });
 
     this._routePointEditComponent.setRollupButtonClickHandler((evt) => {
       evt.preventDefault();
-      this._colseRoutePointEditForm();
+      this.colseRoutePointEditForm();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
     });
 
@@ -126,6 +125,7 @@ export default class PointController {
 
     this._routePointEditComponent.setDeleteButtonClickHandler((evt) => {
       evt.preventDefault();
+      this._routePointEditComponent.setResetButtonText(mode === Mode.ADDING, true);
       this._onDataChange(this, routePoint, null);
       if (mode === Mode.ADDING) {
         this._onViewChange();
@@ -167,8 +167,13 @@ export default class PointController {
 
   setDefaultView() {
     if (this._mode !== Mode.DEFAULT) {
-      this._colseRoutePointEditForm();
+      this.colseRoutePointEditForm();
     }
+  }
+
+  resetButtonTexts() {
+    this._routePointEditComponent.setResetButtonText(this._mode === Mode.ADDING, false);
+    this._routePointEditComponent.setSubmitButtonText(this._mode === Mode.ADDING, false);
   }
 
   destroy() {
@@ -191,7 +196,7 @@ export default class PointController {
     }, SHAKE_ANIMATION_TIMEOUT);
   }
 
-  _colseRoutePointEditForm() {
+  colseRoutePointEditForm() {
     this._routePointEditComponent.reset();
     if (document.contains(this._routePointEditComponent.getElement())) {
       replace(this._routePointComponent, this._routePointEditComponent);
@@ -214,7 +219,7 @@ export default class PointController {
       if (this._mode === Mode.ADDING) {
         this._onDataChange(this, this.getEmptyRoutePoint(this._offersList, this._destinationsList), null);
       }
-      this._colseRoutePointEditForm();
+      this.colseRoutePointEditForm();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
     }
   }

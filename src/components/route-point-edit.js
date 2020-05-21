@@ -6,6 +6,12 @@ import "flatpickr/dist/flatpickr.min.css";
 const ResetButtonCaptions = {
   NEW_ROUTE_POINT: `Cancel`,
   EDIT_ROUTE_POINT: `Delete`,
+  DELETING_ROUTE_POINT: `Deleting...`,
+};
+
+const SubmitButtonCaptions = {
+  SAVE_ROUTE_POINT: `Save`,
+  SAVING_ROUTE_POINT: `Saving...`,
 };
 
 const generateEventTypeTemplate = (eventName) => {
@@ -259,6 +265,30 @@ export default class RoutePoint extends AbstractSmartComponent {
     }, this._isNewRoutePoint, this._offersList, this._destinationsList);
   }
 
+  setResetButtonText(isNewRoutePoint = false, isProcessing = false) {
+    const resetButton = this.getElement().querySelector(`.event__reset-btn`);
+    if (isNewRoutePoint) {
+      resetButton.innerHTML = ResetButtonCaptions.NEW_ROUTE_POINT;
+    } else {
+      resetButton.innerHTML = ResetButtonCaptions.EDIT_ROUTE_POINT;
+    }
+    if (isProcessing) {
+      resetButton.innerHTML = ResetButtonCaptions.DELETING_ROUTE_POINT;
+    }
+  }
+
+  setSubmitButtonText(isNewRoutePoint = false, isProcessing = false) {
+    const submitButton = this.getElement().querySelector(`.event__save-btn`);
+    if (isNewRoutePoint) {
+      submitButton.innerHTML = SubmitButtonCaptions.SAVE_ROUTE_POINT;
+    } else {
+      submitButton.innerHTML = SubmitButtonCaptions.SAVE_ROUTE_POINT;
+    }
+    if (isProcessing) {
+      submitButton.innerHTML = SubmitButtonCaptions.SAVING_ROUTE_POINT;
+    }
+  }
+
   removeElement() {
     if (this._flatpickrStart) {
       this._flatpickrStart.destroy();
@@ -303,7 +333,6 @@ export default class RoutePoint extends AbstractSmartComponent {
   setSubmitHandler(handler) {
     this.getElement().querySelector(`form`)
       .addEventListener(`submit`, handler);
-
     this._submitHandler = handler;
   }
 
