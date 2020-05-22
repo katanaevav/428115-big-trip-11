@@ -1,4 +1,6 @@
-import API from "./api.js";
+import API from "./api/index.js";
+import Provider from "./api/provider.js";
+import Store from "./api/store.js";
 import RouteInfoComponent from "./components/route-info.js";
 import RouteCostComponent from "./components/route-cost.js";
 import MenuComponent from "./components/menu.js";
@@ -14,8 +16,18 @@ import NoRoutePoints from "./components/no-route-points.js";
 
 const AUTHORIZATION = `Basic er883jdzbdw`;
 const END_POINT = `https://11.ecmascript.pages.academy/big-trip`;
+const STORE_PROJECT_NAME = `big-trip-localstorage`;
+const STORE_VER = `v1`;
+const STORE_OFFERS = `offers`;
+const STORE_DESTINATIONS = `destinations`;
+const STORE_ROUTE_POINTS = `route-points`;
+const STORE_NAME = `${STORE_PROJECT_NAME}-${STORE_VER}`;
 
 const api = new API(END_POINT, AUTHORIZATION);
+const offersStore = new Store(`${STORE_OFFERS}-${STORE_NAME}`, window.localStorage);
+const destinationStore = new Store(`${STORE_DESTINATIONS}-${STORE_NAME}`, window.localStorage);
+const routePointsStore = new Store(`${STORE_ROUTE_POINTS}-${STORE_NAME}`, window.localStorage);
+const apiWithProvider = new Provider(api, offersStore, destinationStore, routePointsStore);
 
 const routePointsModel = new RoutePointsModel();
 
@@ -36,7 +48,7 @@ let offersList = [];
 let destinationsList = [];
 
 const generateTripController = (routePoints) => {
-  const tripController = new TripController(tripComponent, routePointsModel, routeCoast, routeInfo, filterController, statisticsComponent, offersList, destinationsList, api);
+  const tripController = new TripController(tripComponent, routePointsModel, routeCoast, routeInfo, filterController, statisticsComponent, offersList, destinationsList, apiWithProvider);
 
   const startSorditngRoutePoints = routePoints.sort((a, b) => a.eventStartDate - b.eventStartDate);
 
@@ -97,9 +109,9 @@ noRoutePoints.setLoading();
 render(tripEventsSection, noRoutePoints, RenderPosition.BEFOREEND);
 
 Promise.all([
-  api.getOffers(),
-  api.getDestinations(),
-  api.getRoutePoints(),
+  apiWithProvider.getOffers(),
+  apiWithProvider.getDestinations(),
+  apiWithProvider.getRoutePoints(),
 ])
 .then((result) => {
   offersList = result[0];
