@@ -4,6 +4,7 @@ import {RenderPosition, render, remove, replace} from "../utils/render.js";
 import RoutePointModel from "../models/point.js";
 
 const FIRST_ELEMENT = 0;
+const SHAKE_ANIMATION_TIMEOUT = 600;
 
 export const Mode = {
   DEFAULT: `default`,
@@ -65,13 +66,13 @@ export default class PointController {
     this._routePointEditComponent = null;
 
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
-    this._colseRoutePointEditForm = this._colseRoutePointEditForm.bind(this);
+    this.colseRoutePointEditForm = this.colseRoutePointEditForm.bind(this);
     this._openRoutePointEditForm = this._openRoutePointEditForm.bind(this);
   }
 
   static getEmptyRoutePoint(offersList, destinationsList) {
     return {
-      id: Date.now(),
+      id: null,
       eventStartDate: Date.now(),
       eventEndDate: Date.now(),
       eventCoast: 0,
@@ -97,34 +98,37 @@ export default class PointController {
 
     this._routePointEditComponent.setSubmitHandler((evt) => {
       evt.preventDefault();
-
+      this._routePointEditComponent.setSubmitButtonText(mode === Mode.ADDING, true);
       const formData = this._routePointEditComponent.getData();
       const data = parseFormData(formData, this._offersList, this._destinationsList);
+      this.disableForm();
       this._onDataChange(this, routePoint, data);
       document.removeEventListener(`keydown`, this._onEscKeyDown);
-      this._colseRoutePointEditForm();
     });
 
     this._routePointEditComponent.setResetHandler((evt) => {
       evt.preventDefault();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
-      this._colseRoutePointEditForm();
+      this.colseRoutePointEditForm();
     });
 
     this._routePointEditComponent.setRollupButtonClickHandler((evt) => {
       evt.preventDefault();
-      this._colseRoutePointEditForm();
+      this.colseRoutePointEditForm();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
     });
 
     this._routePointEditComponent.setFavoriteButtonClickHandler(() => {
       const newRoutePoint = RoutePointModel.clone(routePoint);
       newRoutePoint.eventIsFavorite = !newRoutePoint.eventIsFavorite;
+      this.disableForm();
       this._onDataChange(this, routePoint, newRoutePoint, false);
     });
 
     this._routePointEditComponent.setDeleteButtonClickHandler((evt) => {
       evt.preventDefault();
+      this._routePointEditComponent.setResetButtonText(mode === Mode.ADDING, true);
+      this.disableForm();
       this._onDataChange(this, routePoint, null);
       if (mode === Mode.ADDING) {
         this._onViewChange();
@@ -166,8 +170,28 @@ export default class PointController {
 
   setDefaultView() {
     if (this._mode !== Mode.DEFAULT) {
-      this._colseRoutePointEditForm();
+      this.colseRoutePointEditForm();
     }
+  }
+
+  resetButtonTexts() {
+    this._routePointEditComponent.setResetButtonText(this._mode === Mode.ADDING, false);
+    this._routePointEditComponent.setSubmitButtonText(this._mode === Mode.ADDING, false);
+  }
+
+  disableForm() {
+    if (this._routePointEditComponent.getElement().classList.contains(`border-error`)) {
+      this._routePointEditComponent.getElement().classList.remove(`border-error`);
+    }
+    if (this._routePointComponent.getElement().classList.contains(`border-error`)) {
+      this._routePointComponent.getElement().classList.remove(`border-error`);
+    }
+
+    this._routePointEditComponent.setDisableForm(true);
+  }
+
+  enableForm() {
+    this._routePointEditComponent.setDisableForm(false);
   }
 
   destroy() {
@@ -176,7 +200,19 @@ export default class PointController {
     document.removeEventListener(`keydown`, this._onEscKeyDown);
   }
 
-  _colseRoutePointEditForm() {
+  shake() {
+    this._routePointEditComponent.getElement().classList.add(`shake`);
+    this._routePointComponent.getElement().classList.add(`shake`);
+    this._routePointEditComponent.getElement().classList.add(`border-error`);
+    this._routePointComponent.getElement().classList.add(`border-error`);
+
+    setTimeout(() => {
+      this._routePointEditComponent.getElement().classList.remove(`shake`);
+      this._routePointComponent.getElement().classList.remove(`shake`);
+    }, SHAKE_ANIMATION_TIMEOUT);
+  }
+
+  colseRoutePointEditForm() {
     this._routePointEditComponent.reset();
     if (document.contains(this._routePointEditComponent.getElement())) {
       replace(this._routePointComponent, this._routePointEditComponent);
@@ -199,7 +235,7 @@ export default class PointController {
       if (this._mode === Mode.ADDING) {
         this._onDataChange(this, this.getEmptyRoutePoint(this._offersList, this._destinationsList), null);
       }
-      this._colseRoutePointEditForm();
+      this.colseRoutePointEditForm();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
     }
   }

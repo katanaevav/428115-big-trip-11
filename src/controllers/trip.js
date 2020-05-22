@@ -144,23 +144,48 @@ export default class TripController {
     this._routeStat.getData(this._routePointsModel.getRoutePoints(), this._offersList);
   }
 
+  _setFormState(routePointController, isErrorState = false) {
+    if (isErrorState) {
+      routePointController.shake();
+      routePointController.enableForm();
+      routePointController.resetButtonTexts();
+    } else {
+      routePointController.enableForm();
+      routePointController.resetButtonTexts();
+    }
+  }
+
   _onDataChange(routePointController, oldData, newData, updateData = true) {
-    if (oldData === PointController.getEmptyRoutePoint(this._offersList, this._destinationsList)) {
+    if (oldData.id === null) {
       this._creatingRoutePoint = null;
       if (newData === null) {
         routePointController.destroy();
         this._updateRoutePoints();
       } else {
-        this._routePointsModel.addRoutePoint(newData);
-        routePointController.render(newData, RoutePointControllerMode.DEFAULT);
-        this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
-        this._onFilterChange();
+        this._api.createRoutePoint(newData)
+          .then((routePointModel) => {
+            this._routePointsModel.addRoutePoint(routePointModel);
+            routePointController.render(routePointModel, RoutePointControllerMode.DEFAULT);
+            this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
+            this._onFilterChange();
+            this._setFormState(routePointController);
+            routePointController.colseRoutePointEditForm();
+          })
+          .catch(() => {
+            this._setFormState(routePointController, true);
+          });
       }
     } else if (newData === null) {
 
-      this._routePointsModel.removeRoutePoint(oldData.id);
-      this._updateRoutePoints(this._sortType);
-      this._onSortTypeChange(this._sortType);
+      this._api.deleteRoutePoint(oldData.id)
+        .then(() => {
+          this._routePointsModel.removeRoutePoint(oldData.id);
+          this._updateRoutePoints(this._sortType);
+          this._onSortTypeChange(this._sortType);
+        })
+        .catch(() => {
+          this._setFormState(routePointController, true);
+        });
     } else {
 
       this._api.updateRoutePoint(oldData.id, newData)
@@ -171,8 +196,13 @@ export default class TripController {
             if (updateData) {
               this._onSortTypeChange(this._sortType);
               this._updateRouteInfo();
+              routePointController.colseRoutePointEditForm();
             }
+            this._setFormState(routePointController);
           }
+        })
+        .catch(() => {
+          this._setFormState(routePointController, true);
         });
     }
   }

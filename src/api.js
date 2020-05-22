@@ -41,6 +41,17 @@ const API = class {
     .then(RoutePoints.parsePoints);
   }
 
+  createRoutePoint(routePoint) {
+    return this._load({
+      url: `points`,
+      method: Method.POST,
+      body: JSON.stringify(routePoint.toRAW()),
+      headers: new Headers({"Content-Type": `application/json`})
+    })
+      .then((response) => response.json())
+      .then(RoutePoints.parsePoint);
+  }
+
   updateRoutePoint(id, data) {
     return this._load({
       url: `points/${id}`,
@@ -50,7 +61,10 @@ const API = class {
     })
       .then((response) => response.json())
       .then(RoutePoints.parsePoint);
+  }
 
+  deleteRoutePoint(id) {
+    return this._load({url: `points/${id}`, method: Method.DELETE});
   }
 
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {

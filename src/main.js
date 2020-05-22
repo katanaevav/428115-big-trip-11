@@ -5,11 +5,12 @@ import MenuComponent from "./components/menu.js";
 import NewPointComponent from "./components/new-point.js";
 import {MenuElement} from "./const.js";
 import FilterController from "./controllers/filter.js";
-import {RenderPosition, render} from "./utils/render.js";
+import {RenderPosition, render, remove} from "./utils/render.js";
 import TripController from "./controllers/trip.js";
 import RoutePointsModel from "./models/points.js";
 import TripComponent from "./components/trip.js";
 import StatisticsComponent from "./components/statistics.js";
+import NoRoutePoints from "./components/no-route-points.js";
 
 const AUTHORIZATION = `Basic er883jdzbdw`;
 const END_POINT = `https://11.ecmascript.pages.academy/big-trip`;
@@ -46,7 +47,6 @@ const generateTripController = (routePoints) => {
     tripController.createRoutePoint();
   });
 
-  statisticsComponent.hide();
   tripController.show();
 
   mainMenu.setOnClick((menuItem) => {
@@ -60,6 +60,7 @@ const generateTripController = (routePoints) => {
       case MenuElement.STATISTICS:
         tripController.setSortDefault();
         mainMenu.setActiveItem(MenuElement.STATISTICS);
+        statisticsComponent.getData(routePointsModel.getRoutePointsAll(), offersList);
         statisticsComponent.show();
         tripController.hide();
         break;
@@ -88,18 +89,24 @@ filterController.render();
 
 render(tripEvents, statisticsComponent, RenderPosition.AFTERBEGIN);
 render(tripEvents, tripComponent, RenderPosition.BEFOREEND);
+statisticsComponent.hide();
 
-api.getOffers()
-  .then((offers) => {
-    offersList = offers;
+const tripEventsSection = document.querySelector(`.trip-events`);
+const noRoutePoints = new NoRoutePoints();
+noRoutePoints.setLoading();
+render(tripEventsSection, noRoutePoints, RenderPosition.BEFOREEND);
 
-    api.getDestinations()
-      .then((destinations) => {
-        destinationsList = destinations;
-
-        api.getRoutePoints()
-            .then((routePoints) => {
-              generateTripController(routePoints);
-            });
-      });
-  });
+Promise.all([
+  api.getOffers(),
+  api.getDestinations(),
+  api.getRoutePoints(),
+])
+.then((result) => {
+  offersList = result[0];
+  destinationsList = result[1];
+  remove(noRoutePoints);
+  generateTripController(result[2]);
+})
+.catch(() => {
+  noRoutePoints.setError();
+});
