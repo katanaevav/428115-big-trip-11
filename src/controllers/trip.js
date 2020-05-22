@@ -144,6 +144,17 @@ export default class TripController {
     this._routeStat.getData(this._routePointsModel.getRoutePoints(), this._offersList);
   }
 
+  _setFormState(routePointController, isErrorState = false) {
+    if (isErrorState) {
+      routePointController.shake();
+      routePointController.enableForm();
+      routePointController.resetButtonTexts();
+    } else {
+      routePointController.enableForm();
+      routePointController.resetButtonTexts();
+    }
+  }
+
   _onDataChange(routePointController, oldData, newData, updateData = true) {
     if (oldData.id === null) {
       this._creatingRoutePoint = null;
@@ -157,14 +168,11 @@ export default class TripController {
             routePointController.render(routePointModel, RoutePointControllerMode.DEFAULT);
             this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
             this._onFilterChange();
-            routePointController.enableForm();
-            routePointController.resetButtonTexts();
+            this._setFormState(routePointController);
             routePointController.colseRoutePointEditForm();
           })
           .catch(() => {
-            routePointController.shake();
-            routePointController.enableForm();
-            routePointController.resetButtonTexts();
+            this._setFormState(routePointController, true);
           });
       }
     } else if (newData === null) {
@@ -176,9 +184,7 @@ export default class TripController {
           this._onSortTypeChange(this._sortType);
         })
         .catch(() => {
-          routePointController.shake();
-          routePointController.enableForm();
-          routePointController.resetButtonTexts();
+          this._setFormState(routePointController, true);
         });
     } else {
 
@@ -192,14 +198,11 @@ export default class TripController {
               this._updateRouteInfo();
               routePointController.colseRoutePointEditForm();
             }
-            routePointController.enableForm();
-            routePointController.resetButtonTexts();
+            this._setFormState(routePointController);
           }
         })
         .catch(() => {
-          routePointController.shake();
-          routePointController.enableForm();
-          routePointController.resetButtonTexts();
+          this._setFormState(routePointController, true);
         });
     }
   }

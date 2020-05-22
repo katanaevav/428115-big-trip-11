@@ -2,13 +2,13 @@ import AbstractComponent from "./abstract-component.js";
 
 const Texts = {
   LOADING: `Loading...`,
-  NO_ROUTEPOINTS: `Click New Event to create your first point`,
+  NO_ROUTE_POINTS: `Click New Event to create your first point`,
   ERROR: `Error loading points`
 };
 
 const createNoRoutePointsTemplate = () => {
   return (
-    `<p class="trip-events__msg">${Texts.NO_ROUTEPOINTS}</p>`
+    `<p class="trip-events__msg">${Texts.NO_ROUTE_POINTS}</p>`
   );
 };
 

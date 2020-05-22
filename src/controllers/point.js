@@ -180,8 +180,13 @@ export default class PointController {
   }
 
   disableForm() {
-    this._routePointEditComponent.getElement().style.border = `none`;
-    this._routePointComponent.getElement().style.border = `none`;
+    if (this._routePointEditComponent.getElement().classList.contains(`border-error`)) {
+      this._routePointEditComponent.getElement().classList.remove(`border-error`);
+    }
+    if (this._routePointComponent.getElement().classList.contains(`border-error`)) {
+      this._routePointComponent.getElement().classList.remove(`border-error`);
+    }
+
     this._routePointEditComponent.setDisableForm(true);
   }
 
@@ -196,14 +201,14 @@ export default class PointController {
   }
 
   shake() {
-    this._routePointEditComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
-    this._routePointComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
-    this._routePointEditComponent.getElement().style.border = `3px solid red`;
-    this._routePointComponent.getElement().style.border = `3px solid red`;
+    this._routePointEditComponent.getElement().classList.add(`shake`);
+    this._routePointComponent.getElement().classList.add(`shake`);
+    this._routePointEditComponent.getElement().classList.add(`border-error`);
+    this._routePointComponent.getElement().classList.add(`border-error`);
 
     setTimeout(() => {
-      this._routePointEditComponent.getElement().style.animation = ``;
-      this._routePointComponent.getElement().style.animation = ``;
+      this._routePointEditComponent.getElement().classList.remove(`shake`);
+      this._routePointComponent.getElement().classList.remove(`shake`);
     }, SHAKE_ANIMATION_TIMEOUT);
   }
 

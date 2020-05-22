@@ -60,6 +60,7 @@ const generateTripController = (routePoints) => {
       case MenuElement.STATISTICS:
         tripController.setSortDefault();
         mainMenu.setActiveItem(MenuElement.STATISTICS);
+        statisticsComponent.getData(routePointsModel.getRoutePointsAll(), offersList);
         statisticsComponent.show();
         tripController.hide();
         break;

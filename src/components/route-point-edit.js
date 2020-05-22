@@ -265,8 +265,8 @@ export default class RoutePoint extends AbstractSmartComponent {
     }, this._isNewRoutePoint, this._offersList, this._destinationsList);
   }
 
-  setDisableForm(isDisaable = false) {
-    if (isDisaable) {
+  setDisableForm(isDisable = false) {
+    if (isDisable) {
       document.querySelectorAll(`form input, form button`)
         .forEach((formElement) => formElement.setAttribute(`disabled`, `disabled`));
     } else {
