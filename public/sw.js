@@ -1,0 +1,60 @@
+const CACHE_PREFIX = `big-trip-cache`;
+const CACHE_VER = `v1`;
+const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VER}`;
+
+self.addEventListener(`install`, (evt) => {
+  evt.waitUntil(
+      caches.open(CACHE_NAME)
+        .then((cache) => {
+          return cache.addAll([
+            `/`,
+            `/index.html`,
+            `/bundle.js`,
+            `/css/style.css`,
+            `/img/header-bg.png`,
+            `/img/header-bg@2x.png`,
+            `/img/logo.png`,
+            `/img/icons`,
+          ]);
+        })
+  );
+});
+
+self.addEventListener(`activate`, (evt) => {
+  evt.waitUntil(
+      caches.keys()
+        .then(
+            (keys) => Promise.all(
+                keys.map(
+                    (key) => {
+                      return key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME ? caches.delete(key) : null;
+                    })
+                  .filter((key) => key !== null)
+            )
+        )
+  );
+});
+
+self.addEventListener(`fetch`, (evt) => {
+  const {request} = evt;
+
+  evt.respondWith(
+      caches.match(request)
+        .then((cacheResponse) => {
+          if (cacheResponse) {
+            return cacheResponse;
+          }
+          return fetch(request)
+            .then((response) => {
+              if (!response || response.status !== 200 || response.type !== `basic`) {
+                return response;
+              }
+              const clonedResponse = response.clone();
+              caches.open(CACHE_NAME)
+              // eslint-disable-next-line
+                .then((cache) => cache.put(request, clonedResponse));
+              return response;
+            });
+        })
+  );
+});

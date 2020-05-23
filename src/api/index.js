@@ -1,6 +1,6 @@
-import Offers from "./models/offer.js";
-import Destinations from "./models/destination.js";
-import RoutePoints from "./models/point.js";
+import Offers from "../models/offer.js";
+import Destinations from "../models/destination.js";
+import RoutePoints from "../models/point.js";
 
 const Method = {
   GET: `GET`,
@@ -52,11 +52,11 @@ const API = class {
       .then(RoutePoints.parsePoint);
   }
 
-  updateRoutePoint(id, data) {
+  updateRoutePoint(id, routePoint) {
     return this._load({
       url: `points/${id}`,
       method: Method.PUT,
-      body: JSON.stringify(data.toRAW()),
+      body: JSON.stringify(routePoint.toRAW()),
       headers: new Headers({"Content-Type": `application/json`})
     })
       .then((response) => response.json())
@@ -65,6 +65,16 @@ const API = class {
 
   deleteRoutePoint(id) {
     return this._load({url: `points/${id}`, method: Method.DELETE});
+  }
+
+  sync(data) {
+    return this._load({
+      url: `points/sync`,
+      method: Method.POST,
+      body: JSON.stringify(data),
+      headers: new Headers({"Content-Type": `application/json`})
+    })
+      .then((response) => response.json());
   }
 
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {

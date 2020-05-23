@@ -170,6 +170,7 @@ export default class TripController {
             this._onFilterChange();
             this._setFormState(routePointController);
             routePointController.colseRoutePointEditForm();
+            this._updateRouteInfo();
           })
           .catch(() => {
             this._setFormState(routePointController, true);
@@ -181,6 +182,7 @@ export default class TripController {
         .then(() => {
           this._routePointsModel.removeRoutePoint(oldData.id);
           this._updateRoutePoints(this._sortType);
+          this._updateRouteInfo();
           this._onSortTypeChange(this._sortType);
         })
         .catch(() => {

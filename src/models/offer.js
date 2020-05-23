@@ -19,6 +19,18 @@ export default class Offer {
     });
   }
 
+  toRAW() {
+    const eventOffers = this.offers.map((offer) => ({
+      title: offer.name,
+      price: offer.coast,
+    }));
+
+    return {
+      type: this.name,
+      offers: eventOffers,
+    };
+  }
+
   static parseOffer(data) {
     return new Offer(data);
   }
