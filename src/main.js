@@ -17,11 +17,11 @@ import NoRoutePoints from "./components/no-route-points.js";
 const AUTHORIZATION = `Basic er883jdzbdw`;
 const END_POINT = `https://11.ecmascript.pages.academy/big-trip`;
 const STORE_PROJECT_NAME = `big-trip-localstorage`;
-const STORE_VER = `v1`;
+const STORE_VERSION = `v1`;
 const STORE_OFFERS = `offers`;
 const STORE_DESTINATIONS = `destinations`;
 const STORE_ROUTE_POINTS = `route-points`;
-const STORE_NAME = `${STORE_PROJECT_NAME}-${STORE_VER}`;
+const STORE_NAME = `${STORE_PROJECT_NAME}-${STORE_VERSION}`;
 
 const api = new API(END_POINT, AUTHORIZATION);
 const offersStore = new Store(`${STORE_OFFERS}-${STORE_NAME}`, window.localStorage);
@@ -130,12 +130,7 @@ window.addEventListener(`online`, () => {
 });
 
 window.addEventListener(`load`, () => {
-  navigator.serviceWorker.register(`/sw.js`)
-    .then(() => {
-
-    }).catch(() => {
-
-    });
+  navigator.serviceWorker.register(`/sw.js`);
 });
 
 window.addEventListener(`offline`, () => {

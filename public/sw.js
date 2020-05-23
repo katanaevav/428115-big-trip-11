@@ -14,16 +14,7 @@ self.addEventListener(`install`, (evt) => {
             `/img/header-bg.png`,
             `/img/header-bg@2x.png`,
             `/img/logo.png`,
-            `/img/icons/bus.png`,
-            `/img/icons/check-in.png`,
-            `/img/icons/drive.png`,
-            `/img/icons/flight.png`,
-            `/img/icons/restaurant.png`,
-            `/img/icons/ship.png`,
-            `/img/icons/sightseeing.png`,
-            `/img/icons/taxi.png`,
-            `/img/icons/train.png`,
-            `/img/icons/transport.png`,
+            `/img/icons`,
           ]);
         })
   );
@@ -36,10 +27,7 @@ self.addEventListener(`activate`, (evt) => {
             (keys) => Promise.all(
                 keys.map(
                     (key) => {
-                      if (key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME) {
-                        return caches.delete(key);
-                      }
-                      return null;
+                      return key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME ? caches.delete(key) : null;
                     })
                   .filter((key) => key !== null)
             )

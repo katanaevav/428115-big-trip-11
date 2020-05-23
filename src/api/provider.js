@@ -84,8 +84,7 @@ export default class Provider {
       });
     }
 
-    const localNewRoutePointId = nanoid();
-    const localNewRoutePoint = RoutePoint.clone(Object.assign(routePoint, {id: localNewRoutePointId}));
+    const localNewRoutePoint = RoutePoint.clone(Object.assign(routePoint, {id: nanoid()}));
 
     this._routePointsStore.setItem(localNewRoutePoint.id, localNewRoutePoint.toRAW());
 
