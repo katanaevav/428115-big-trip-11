@@ -7,6 +7,19 @@ const isOnline = () => {
   return window.navigator.onLine;
 };
 
+const getSyncedRoutePoints = (items) => {
+  return items.filter(({success}) => success)
+    .map(({payload}) => payload.point);
+};
+
+const createStoreStructure = (items) => {
+  return items.reduce((acc, current) => {
+    return Object.assign({}, acc, {
+      [current.id]: current,
+    });
+  }, {});
+};
+
 export default class Provider {
   constructor(api, offersStore, destinationStore, routePointsStore) {
     this._api = api;
@@ -19,7 +32,7 @@ export default class Provider {
     if (isOnline()) {
       return this._api.getOffers()
       .then((offers) => {
-        offers.forEach((offer, index) => this._offersStore.setItem(index, offer));
+        offers.forEach((offer, index) => this._offersStore.setItem(index, offer.toRAW()));
 
         return offers;
       });
@@ -34,7 +47,7 @@ export default class Provider {
     if (isOnline()) {
       return this._api.getDestinations()
       .then((destinations) => {
-        destinations.forEach((destination, index) => this._destinationStore.setItem(index, destination));
+        destinations.forEach((destination, index) => this._destinationStore.setItem(index, destination.toRAW()));
 
         return destinations;
       });
@@ -49,11 +62,7 @@ export default class Provider {
     if (isOnline()) {
       return this._api.getRoutePoints()
       .then((routePoints) => {
-        const items = routePoints.reduce((acc, current) => {
-          return Object.assign({}, acc, {
-            [current.id]: current,
-          });
-        }, {});
+        const items = createStoreStructure(routePoints.map((routePoint) => routePoint.toRAW()));
 
         this._routePointsStore.setItems(items);
         return routePoints;
@@ -69,7 +78,7 @@ export default class Provider {
     if (isOnline()) {
       return this._api.createRoutePoint(routePoint)
       .then((newRoutePoint) => {
-        this._routePointsStore.setItem(newRoutePoint.id, newRoutePoint);
+        this._routePointsStore.setItem(newRoutePoint.id, newRoutePoint.toRAW());
 
         return newRoutePoint;
       });
@@ -78,7 +87,7 @@ export default class Provider {
     const localNewRoutePointId = nanoid();
     const localNewRoutePoint = RoutePoint.clone(Object.assign(routePoint, {id: localNewRoutePointId}));
 
-    this._routePointsStore.setItem(localNewRoutePoint.id, localNewRoutePoint);
+    this._routePointsStore.setItem(localNewRoutePoint.id, localNewRoutePoint.toRAW());
 
     return Promise.resolve(localNewRoutePoint);
   }
@@ -87,7 +96,7 @@ export default class Provider {
     if (isOnline()) {
       return this._api.updateRoutePoint(id, routePoint)
       .then((newRoutePoint) => {
-        this._routePointsStore.setItem(newRoutePoint.id, newRoutePoint);
+        this._routePointsStore.setItem(newRoutePoint.id, newRoutePoint.toRAW());
 
         return newRoutePoint;
       });
@@ -95,7 +104,7 @@ export default class Provider {
 
     const localRoutePoint = RoutePoint.clone(Object.assign(routePoint, {id}));
 
-    this._routePointsStore.setItem(id, localRoutePoint);
+    this._routePointsStore.setItem(id, localRoutePoint.toRAW());
 
     return Promise.resolve(localRoutePoint);
   }
@@ -109,5 +118,21 @@ export default class Provider {
     this._routePointsStore.removeItem(id);
 
     return Promise.resolve();
+  }
+
+  sync() {
+    if (isOnline()) {
+      const storeRoutePoints = Object.values(this._routePointsStore.getItems());
+      return this._api.sync(storeRoutePoints)
+        .then((response) => {
+          const createdRoutePoints = getSyncedRoutePoints(response.created);
+          const updatedRoutePoints = getSyncedRoutePoints(response.updated);
+          const items = createStoreStructure([...createdRoutePoints, ...updatedRoutePoints]);
+
+          this._routePointsStore.setItems(items);
+        });
+    }
+
+    return Promise.reject(new Error(`Sync data failed`));
   }
 }

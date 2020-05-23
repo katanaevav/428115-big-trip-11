@@ -122,3 +122,22 @@ Promise.all([
 .catch(() => {
   noRoutePoints.setError();
 });
+
+window.addEventListener(`online`, () => {
+  document.title = document.title.replace(` [offline]`, ``);
+
+  apiWithProvider.sync();
+});
+
+window.addEventListener(`load`, () => {
+  navigator.serviceWorker.register(`/sw.js`)
+    .then(() => {
+
+    }).catch(() => {
+
+    });
+});
+
+window.addEventListener(`offline`, () => {
+  document.title += ` [offline]`;
+});
