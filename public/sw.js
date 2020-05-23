@@ -63,6 +63,7 @@ self.addEventListener(`fetch`, (evt) => {
               }
               const clonedResponse = response.clone();
               caches.open(CACHE_NAME)
+              // eslint-disable-next-line
                 .then((cache) => cache.put(request, clonedResponse));
               return response;
             });
