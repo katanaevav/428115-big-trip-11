@@ -4,7 +4,7 @@ import {FilterType} from "../const.js";
 export default class Points {
   constructor() {
     this._routePoints = [];
-    this._activeFilterType = FilterType.ALL;
+    this._activeFilterType = FilterType.EVERYTHING;
 
     this._dataChangeHandlers = [];
     this._filterChangeHandlers = [];

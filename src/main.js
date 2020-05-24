@@ -22,6 +22,7 @@ const STORE_OFFERS = `offers`;
 const STORE_DESTINATIONS = `destinations`;
 const STORE_ROUTE_POINTS = `route-points`;
 const STORE_NAME = `${STORE_PROJECT_NAME}-${STORE_VERSION}`;
+const OFFLINE = ` [offline]`;
 
 const api = new API(END_POINT, AUTHORIZATION);
 const offersStore = new Store(`${STORE_OFFERS}-${STORE_NAME}`, window.localStorage);
@@ -124,7 +125,7 @@ Promise.all([
 });
 
 window.addEventListener(`online`, () => {
-  document.title = document.title.replace(` [offline]`, ``);
+  document.title = document.title.replace(OFFLINE, ``);
 
   apiWithProvider.sync();
 });
@@ -134,5 +135,5 @@ window.addEventListener(`load`, () => {
 });
 
 window.addEventListener(`offline`, () => {
-  document.title += ` [offline]`;
+  document.title += OFFLINE;
 });

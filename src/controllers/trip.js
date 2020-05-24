@@ -4,7 +4,7 @@ import DaysComponent from "../components/days.js";
 import DayComponent from "../components/day.js";
 import {RenderPosition, render, remove} from "../utils/render.js";
 import {getDatesDuration} from "../utils/common.js";
-import PointController, {Mode as RoutePointControllerMode, Mode} from "./point.js";
+import PointController, {Mode as RoutePointControllerMode, Mode, getEmptyRoutePoint} from "./point.js";
 
 const getSortedRoutePoints = (routePoints, sortType) => {
   let sortedRoutePoints = [];
@@ -123,7 +123,7 @@ export default class TripController {
     this._onFilterChange();
     this._showedRoutePointControllers.forEach((it) => it.setDefaultView());
     this._creatingRoutePoint = new PointController(this._daysComponent.getElement(), this._onDataChange, this._onViewChange, this._offersList, this._destinationsList);
-    this._creatingRoutePoint.render(PointController.getEmptyRoutePoint(this._offersList, this._destinationsList), RoutePointControllerMode.ADDING);
+    this._creatingRoutePoint.render(getEmptyRoutePoint(this._offersList, this._destinationsList), RoutePointControllerMode.ADDING);
   }
 
   _removeRoutePoints() {
@@ -155,7 +155,7 @@ export default class TripController {
     }
   }
 
-  _onDataChange(routePointController, oldData, newData, updateData = true) {
+  _onDataChange(routePointController, oldData, newData, isUpdateData = true) {
     if (oldData.id === null) {
       this._creatingRoutePoint = null;
       if (newData === null) {
@@ -195,7 +195,7 @@ export default class TripController {
           const isSuccess = this._routePointsModel.updateRoutePoint(oldData.id, newData);
           if (isSuccess) {
             routePointController.render(routePointModel, Mode.EDIT);
-            if (updateData) {
+            if (isUpdateData) {
               this._onSortTypeChange(this._sortType);
               this._updateRouteInfo();
               routePointController.colseRoutePointEditForm();

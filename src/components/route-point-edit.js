@@ -3,6 +3,8 @@ import AbstractSmartComponent from "./abstract-smart-component.js";
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 
+const RADIO_ELEMENT = `radio`;
+
 const ResetButtonCaptions = {
   NEW_ROUTE_POINT: `Cancel`,
   EDIT_ROUTE_POINT: `Delete`,
@@ -426,7 +428,7 @@ export default class RoutePoint extends AbstractSmartComponent {
 
     element.querySelector(`.event__type-list`)
       .addEventListener(`click`, (evt) => {
-        if (evt.target.type === `radio`) {
+        if (evt.target.type === RADIO_ELEMENT) {
           const selectedEventType = eventTypes.find((eventType) => {
             return evt.target.value === eventType.name.toLowerCase();
           });

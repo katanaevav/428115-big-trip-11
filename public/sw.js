@@ -1,6 +1,7 @@
 const CACHE_PREFIX = `big-trip-cache`;
 const CACHE_VER = `v1`;
 const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VER}`;
+const RESPONSE_TYPE_BASIC = `basic`;
 
 self.addEventListener(`install`, (evt) => {
   evt.waitUntil(
@@ -14,7 +15,16 @@ self.addEventListener(`install`, (evt) => {
             `/img/header-bg.png`,
             `/img/header-bg@2x.png`,
             `/img/logo.png`,
-            `/img/icons`,
+            `/img/icons/bus.png`,
+            `/img/icons/check-in.png`,
+            `/img/icons/drive.png`,
+            `/img/icons/flight.png`,
+            `/img/icons/restaurant.png`,
+            `/img/icons/ship.png`,
+            `/img/icons/sightseeing.png`,
+            `/img/icons/taxi.png`,
+            `/img/icons/train.png`,
+            `/img/icons/transport.png`,
           ]);
         })
   );
@@ -46,7 +56,7 @@ self.addEventListener(`fetch`, (evt) => {
           }
           return fetch(request)
             .then((response) => {
-              if (!response || response.status !== 200 || response.type !== `basic`) {
+              if (!response || response.status !== 200 || response.type !== RESPONSE_TYPE_BASIC) {
                 return response;
               }
               const clonedResponse = response.clone();

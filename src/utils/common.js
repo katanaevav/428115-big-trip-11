@@ -1,7 +1,8 @@
 import moment from "moment";
+import {EventTypes} from "../const.js";
 
 const DAYS = 30;
-const EVENT_TYPE_TRANSFER = `Transfer`;
+const EVENT_TYPE_TRANSFER = EventTypes.TRANSFER;
 const PRETEXT_TRANSFER = `to`;
 const PRETEXT_ACTIVITY = `in`;
 
@@ -10,8 +11,8 @@ const setZeroAtStart = (number) => {
   return str.length < 2 ? `0${str}` : str;
 };
 
-export const firstButtonUpCase = (string) => {
-  return string[0].toUpperCase() + string.slice(1);
+export const firstButtonUpCase = (text) => {
+  return text[0].toUpperCase() + text.slice(1);
 };
 
 export const isFutureEvent = (eventStartDate) => {
@@ -39,15 +40,15 @@ export const getRandomInt = (max) => {
 };
 
 export const getRandomNumbers = function (minNumber, maxNumber, count) {
-  let array = [];
+  let numbers = [];
   let number;
-  while (array.length < count) {
+  while (numbers.length < count) {
     number = Math.floor((minNumber + Math.random()) * maxNumber);
-    if (array.indexOf(number) === -1) {
-      array.push(number);
+    if (numbers.indexOf(number) === -1) {
+      numbers.push(number);
     }
   }
-  return array;
+  return numbers;
 };
 
 export const setDateToHTMLFormat = (dateInInt) => {

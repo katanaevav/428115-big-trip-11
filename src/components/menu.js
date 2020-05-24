@@ -1,6 +1,7 @@
 import AbstractComponent from "./abstract-component.js";
 import {MenuElement} from "../const.js";
 
+const LINK_TAG = `A`;
 
 const createMenuTemplate = () => {
   return (
@@ -28,7 +29,7 @@ export default class Menu extends AbstractComponent {
 
   setOnClick(handler) {
     this.getElement().addEventListener(`click`, (evt) => {
-      if (evt.target.tagName !== `A`) {
+      if (evt.target.tagName !== LINK_TAG) {
         return;
       }
 

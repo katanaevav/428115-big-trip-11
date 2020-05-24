@@ -10,3 +10,13 @@ export const MenuElement = {
   ALL: `.trip-tabs__btn`,
   ACTIVE: `trip-tabs__btn--active`,
 };
+
+export const EventTypes = {
+  TRANSFER: `Transfer`,
+  ACTIVITY: `Activity`,
+};
+
+export const EcapeKeysValues = {
+  FULL: `Escape`,
+  SHORT: `Esc`,
+};

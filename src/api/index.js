@@ -67,11 +67,11 @@ const API = class {
     return this._load({url: `points/${id}`, method: Method.DELETE});
   }
 
-  sync(data) {
+  sync(routePoints) {
     return this._load({
       url: `points/sync`,
       method: Method.POST,
-      body: JSON.stringify(data),
+      body: JSON.stringify(routePoints),
       headers: new Headers({"Content-Type": `application/json`})
     })
       .then((response) => response.json());

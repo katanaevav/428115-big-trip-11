@@ -2,7 +2,9 @@ import RoutePointComponent from "../components/route-point.js";
 import RoutePointEditComponent from "../components/route-point-edit.js";
 import {RenderPosition, render, remove, replace} from "../utils/render.js";
 import RoutePointModel from "../models/point.js";
+import {EcapeKeysValues} from "../const.js";
 
+const ON_VALUE = `on`;
 const FIRST_ELEMENT = 0;
 const SHAKE_ANIMATION_TIMEOUT = 600;
 
@@ -35,7 +37,7 @@ const parseFormData = (formData, eventTypes, destinations) => {
     "date_from": (formData.get(`event-start-time`)),
     "date_to": (formData.get(`event-end-time`)),
     "base_price": formData.get(`event-price`),
-    "is_favorite": formData.get(`event-favorite`) === `on`,
+    "is_favorite": formData.get(`event-favorite`) === ON_VALUE,
 
     "offers": eventTypeStructure.offers.filter((offer) => {
       return selectedOffers.includes(offer.key);
@@ -50,6 +52,19 @@ const parseFormData = (formData, eventTypes, destinations) => {
   });
 
   return routePointModel;
+};
+
+export const getEmptyRoutePoint = (offersList, destinationsList) => {
+  return {
+    id: null,
+    eventStartDate: Date.now(),
+    eventEndDate: Date.now(),
+    eventCoast: 0,
+    eventOffers: [],
+    eventType: offersList[FIRST_ELEMENT].name,
+    eventDestination: destinationsList[FIRST_ELEMENT],
+    eventIsFavorite: false,
+  };
 };
 
 export default class PointController {
@@ -70,19 +85,6 @@ export default class PointController {
     this._openRoutePointEditForm = this._openRoutePointEditForm.bind(this);
   }
 
-  static getEmptyRoutePoint(offersList, destinationsList) {
-    return {
-      id: null,
-      eventStartDate: Date.now(),
-      eventEndDate: Date.now(),
-      eventCoast: 0,
-      eventOffers: [],
-      eventType: offersList[FIRST_ELEMENT].name,
-      eventDestination: destinationsList[FIRST_ELEMENT],
-      eventIsFavorite: false,
-    };
-  }
-
   render(routePoint, mode = Mode.DEFAULT) {
     const oldRoutePointComponent = this._routePointComponent;
     const oldRoutePointEditComponent = this._routePointEditComponent;
@@ -100,9 +102,9 @@ export default class PointController {
       evt.preventDefault();
       this._routePointEditComponent.setSubmitButtonText(mode === Mode.ADDING, true);
       const formData = this._routePointEditComponent.getData();
-      const data = parseFormData(formData, this._offersList, this._destinationsList);
+      const routePointData = parseFormData(formData, this._offersList, this._destinationsList);
       this.disableForm();
-      this._onDataChange(this, routePoint, data);
+      this._onDataChange(this, routePoint, routePointData);
       document.removeEventListener(`keydown`, this._onEscKeyDown);
     });
 
@@ -229,11 +231,12 @@ export default class PointController {
   }
 
   _onEscKeyDown(evt) {
-    const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
+    const isEscKey = evt.key === EcapeKeysValues.FULL || evt.key === EcapeKeysValues.SHORT;
 
     if (isEscKey) {
       if (this._mode === Mode.ADDING) {
-        this._onDataChange(this, this.getEmptyRoutePoint(this._offersList, this._destinationsList), null);
+        this._creatingRoutePoint.destroy();
+        this._creatingRoutePoint = null;
       }
       this.colseRoutePointEditForm();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
