@@ -1,26 +1,26 @@
 import {setDateToHTMLFormat, firstButtonUpCase} from "../utils/common.js";
 
 export default class Point {
-  constructor(data) {
-    this.id = data.id;
-    this.eventStartDate = Date.parse(data.date_from);
-    this.eventEndDate = Date.parse(data.date_to);
-    this.eventCoast = parseInt(data.base_price, 10);
+  constructor(routePoint) {
+    this.id = routePoint.id;
+    this.eventStartDate = Date.parse(routePoint.date_from);
+    this.eventEndDate = Date.parse(routePoint.date_to);
+    this.eventCoast = parseInt(routePoint.base_price, 10);
 
-    this.eventOffers = data.offers.map((offer) => ({
+    this.eventOffers = routePoint.offers.map((offer) => ({
       name: offer.title,
       key: `event-offer-${offer.title.toLowerCase().replace(/\s/g, `-`)}`,
       coast: parseInt(offer.price, 10),
     }));
 
-    this.eventType = firstButtonUpCase(data.type);
+    this.eventType = firstButtonUpCase(routePoint.type);
 
     this.eventDestination = {};
-    this.eventDestination.name = data.destination.name;
-    this.eventDestination.description = data.destination.description;
-    this.eventDestination.photos = data.destination.pictures;
+    this.eventDestination.name = routePoint.destination.name;
+    this.eventDestination.description = routePoint.destination.description;
+    this.eventDestination.photos = routePoint.destination.pictures;
 
-    this.eventIsFavorite = data.is_favorite;
+    this.eventIsFavorite = routePoint.is_favorite;
   }
 
   toRAW() {
@@ -48,15 +48,15 @@ export default class Point {
     return rawData;
   }
 
-  static parsePoint(data) {
-    return new Point(data);
+  static parsePoint(routePoint) {
+    return new Point(routePoint);
   }
 
-  static parsePoints(data) {
-    return data.map(Point.parsePoint);
+  static parsePoints(routePoints) {
+    return routePoints.map(Point.parsePoint);
   }
 
-  static clone(data) {
-    return new Point(data.toRAW());
+  static clone(routePoint) {
+    return new Point(routePoint.toRAW());
   }
 }

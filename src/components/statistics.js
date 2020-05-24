@@ -1,5 +1,6 @@
 import {uniqueItems, generateTextDuration} from "../utils/common.js";
 import AbstractComponent from "./abstract-smart-component.js";
+import {EventTypes} from "../const.js";
 import Chart from "chart.js";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import moment from "moment";
@@ -302,7 +303,7 @@ export default class Statistic extends AbstractComponent {
 
     const allPoints = this._routePointsTypeList;
     const transportPoints = this._routePointsTypeList.slice()
-                                               .filter((it) => it.type === `Transfer`);
+                                               .filter((it) => it.type === EventTypes.TRANSFER);
 
     moneyCtx.height = BAR_HEIGHT * allPoints.length + 1;
     transportCtx.height = BAR_HEIGHT * transportPoints.length + 1;

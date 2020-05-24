@@ -1,16 +1,13 @@
-const EventTypes = {
-  TRANSFER: `Transfer`,
-  ACTIVITY: `Activity`,
-};
+import {EventTypes} from "../const.js";
 
 const ACTIVITIES = [`Check-in`, `Sightseeing`, `Restaurant`];
 
 export default class Offer {
-  constructor(data) {
-    this.name = data.type;
-    this.type = ACTIVITIES.some((it) => it.toLowerCase() === data.type) ? EventTypes.ACTIVITY : EventTypes.TRANSFER;
+  constructor(eventType) {
+    this.name = eventType.type;
+    this.type = ACTIVITIES.some((it) => it.toLowerCase() === eventType.type) ? EventTypes.ACTIVITY : EventTypes.TRANSFER;
     this.offers = [];
-    data.offers.forEach((offer) => {
+    eventType.offers.forEach((offer) => {
       this.offers.push({
         name: offer.title,
         key: `event-offer-${offer.title.toLowerCase().replace(/\s/g, `-`)}`,
@@ -31,11 +28,11 @@ export default class Offer {
     };
   }
 
-  static parseOffer(data) {
-    return new Offer(data);
+  static parseOffer(eventType) {
+    return new Offer(eventType);
   }
 
-  static parseOffers(data) {
-    return data.map(Offer.parseOffer);
+  static parseOffers(eventTypes) {
+    return eventTypes.map(Offer.parseOffer);
   }
 }
