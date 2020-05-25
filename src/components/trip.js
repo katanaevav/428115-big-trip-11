@@ -16,4 +16,8 @@ export default class Trip extends AbstractComponent {
   getTemplate() {
     return createTripTemplate();
   }
+
+  getHeaderElement() {
+    return this.getElement().querySelector(`h2`);
+  }
 }

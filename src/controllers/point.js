@@ -129,11 +129,12 @@ export default class PointController {
 
     this._routePointEditComponent.setDeleteButtonClickHandler((evt) => {
       evt.preventDefault();
-      this._routePointEditComponent.setResetButtonText(mode === Mode.ADDING, true);
-      this.disableForm();
-      this._onDataChange(this, routePoint, null);
       if (mode === Mode.ADDING) {
         this._onViewChange();
+      } else {
+        this._routePointEditComponent.setResetButtonText(mode === Mode.ADDING, true);
+        this.disableForm();
+        this._onDataChange(this, routePoint, null);
       }
     });
 
@@ -235,8 +236,7 @@ export default class PointController {
 
     if (isEscKey) {
       if (this._mode === Mode.ADDING) {
-        this._creatingRoutePoint.destroy();
-        this._creatingRoutePoint = null;
+        this._onViewChange();
       }
       this.colseRoutePointEditForm();
       document.removeEventListener(`keydown`, this._onEscKeyDown);

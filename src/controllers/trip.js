@@ -66,7 +66,7 @@ export default class TripController {
 
   render() {
     const tripEvents = this._container.getElement();
-    const tripSorting = tripEvents.querySelector(`h2`);
+    const tripSorting = this._container.getHeaderElement();
     render(tripSorting, this._sortComponent, RenderPosition.AFTEREND);
     render(tripEvents, this._daysComponent, RenderPosition.BEFOREEND);
 
@@ -88,7 +88,7 @@ export default class TripController {
         this._days.push(dayComponent);
         render(daysComponent.getElement(), dayComponent, RenderPosition.BEFOREEND);
       }
-      const routePointController = new PointController(dayComponent.getElement().querySelector(`.trip-events__list`), onDataChange, onViewChange, this._offersList, this._destinationsList);
+      const routePointController = new PointController(dayComponent.getEventListElement(), onDataChange, onViewChange, this._offersList, this._destinationsList);
       routePointController.render(routePoint, RoutePointControllerMode.DEFAULT);
       return routePointController;
     });
