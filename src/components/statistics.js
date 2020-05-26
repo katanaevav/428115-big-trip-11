@@ -237,7 +237,7 @@ const renderTimeSpendChart = (timeSpendCtx, routePointsList, timeSpendList) => {
   });
 };
 
-const createStatisticTemplate = () => {
+const createStatisticsTemplate = () => {
   return (
     `<section class="statistics">
     <h2 class="visually-hidden">Trip statistics</h2>
@@ -257,7 +257,7 @@ const createStatisticTemplate = () => {
   );
 };
 
-export default class Statistic extends AbstractComponent {
+export default class Statistics extends AbstractComponent {
   constructor() {
     super();
 
@@ -271,7 +271,7 @@ export default class Statistic extends AbstractComponent {
   }
 
   getTemplate() {
-    return createStatisticTemplate();
+    return createStatisticsTemplate();
   }
 
   getData(routePoints, eventTypes) {

@@ -229,7 +229,7 @@ const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint,
   );
 };
 
-export default class RoutePoint extends AbstractSmartComponent {
+export default class RoutePointEdit extends AbstractSmartComponent {
   constructor(routePoint, isNew = false, offersList, destinationsList) {
     super();
 
