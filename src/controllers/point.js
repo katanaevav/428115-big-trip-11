@@ -2,7 +2,7 @@ import RoutePointComponent from "../components/route-point.js";
 import RoutePointEditComponent from "../components/route-point-edit.js";
 import {RenderPosition, render, remove, replace} from "../utils/render.js";
 import RoutePointModel from "../models/point.js";
-import {EcapeKeysValues} from "../const.js";
+import {valuesForEscapeKey} from "../const.js";
 
 const ON_VALUE = `on`;
 const FIRST_ELEMENT = 0;
@@ -82,7 +82,7 @@ export default class PointController {
     this._routePointEditComponent = null;
 
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
-    this.colseRoutePointEditForm = this.colseRoutePointEditForm.bind(this);
+    this.closeRoutePointEditForm = this.closeRoutePointEditForm.bind(this);
     this._openRoutePointEditForm = this._openRoutePointEditForm.bind(this);
   }
 
@@ -112,12 +112,12 @@ export default class PointController {
     this._routePointEditComponent.setResetHandler((evt) => {
       evt.preventDefault();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
-      this.colseRoutePointEditForm();
+      this.closeRoutePointEditForm();
     });
 
     this._routePointEditComponent.setRollupButtonClickHandler((evt) => {
       evt.preventDefault();
-      this.colseRoutePointEditForm();
+      this.closeRoutePointEditForm();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
     });
 
@@ -174,7 +174,7 @@ export default class PointController {
 
   setDefaultView() {
     if (this._mode !== Mode.DEFAULT) {
-      this.colseRoutePointEditForm();
+      this.closeRoutePointEditForm();
     }
   }
 
@@ -216,7 +216,7 @@ export default class PointController {
     }, SHAKE_ANIMATION_TIMEOUT);
   }
 
-  colseRoutePointEditForm() {
+  closeRoutePointEditForm() {
     this._routePointEditComponent.reset();
     if (document.contains(this._routePointEditComponent.getElement())) {
       replace(this._routePointComponent, this._routePointEditComponent);
@@ -233,13 +233,13 @@ export default class PointController {
   }
 
   _onEscKeyDown(evt) {
-    const isEscKey = evt.key === EcapeKeysValues.FULL || evt.key === EcapeKeysValues.SHORT;
+    const isEscKey = evt.key === valuesForEscapeKey.FULL || evt.key === valuesForEscapeKey.SHORT;
 
     if (isEscKey) {
       if (this._mode === Mode.ADDING) {
         this._onViewChange();
       }
-      this.colseRoutePointEditForm();
+      this.closeRoutePointEditForm();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
     }
   }

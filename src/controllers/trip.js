@@ -169,7 +169,7 @@ export default class TripController {
             this._showedRoutePointControllers = [].concat(routePointController, this._showedRoutePointControllers);
             this._onFilterChange();
             this._setFormState(routePointController);
-            routePointController.colseRoutePointEditForm();
+            routePointController.closeRoutePointEditForm();
             this._updateRouteInfo();
           })
           .catch(() => {
@@ -198,7 +198,7 @@ export default class TripController {
             if (isUpdateData) {
               this._onSortTypeChange(this._sortType);
               this._updateRouteInfo();
-              routePointController.colseRoutePointEditForm();
+              routePointController.closeRoutePointEditForm();
             }
             this._setFormState(routePointController);
           }

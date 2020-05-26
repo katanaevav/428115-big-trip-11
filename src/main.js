@@ -51,7 +51,7 @@ let destinationsList = [];
 const generateTripController = (routePoints) => {
   const tripController = new TripController(tripComponent, routePointsModel, routeCoast, routeInfo, filterController, statisticsComponent, offersList, destinationsList, apiWithProvider);
 
-  const startSorditngRoutePoints = routePoints.sort((a, b) => a.eventStartDate - b.eventStartDate);
+  const initialSortedRoutePoints = routePoints.sort((a, b) => a.eventStartDate - b.eventStartDate);
 
   const newPoint = new NewPointComponent();
   render(tripMainElement, newPoint, RenderPosition.BEFOREEND);
@@ -80,18 +80,18 @@ const generateTripController = (routePoints) => {
     }
   });
 
-  routePointsModel.setRoutePoints(startSorditngRoutePoints);
+  routePointsModel.setRoutePoints(initialSortedRoutePoints);
 
-  tripController.render(startSorditngRoutePoints);
+  tripController.render(initialSortedRoutePoints);
 
-  routeInfo.generate(startSorditngRoutePoints);
+  routeInfo.generate(initialSortedRoutePoints);
   render(tripMainElement, routeInfo, RenderPosition.AFTERBEGIN);
 
-  routeCoast.calculate(startSorditngRoutePoints);
+  routeCoast.calculate(initialSortedRoutePoints);
   const tripInfo = tripMainElement.querySelector(`.trip-info__main`);
   render(tripInfo, routeCoast, RenderPosition.AFTEREND);
 
-  statisticsComponent.getData(startSorditngRoutePoints, offersList);
+  statisticsComponent.getData(initialSortedRoutePoints, offersList);
   statisticsComponent.hide();
 };
 

@@ -78,7 +78,7 @@ const generateOfferTemplate = (offer, selected) => {
   );
 };
 
-const genearteOfferSection = (selectedEventType, eventOffers, eventTypes) => {
+const generateOfferSection = (selectedEventType, eventOffers, eventTypes) => {
   let sectionTemplate = ``;
 
   const selectedOffer = eventTypes.find((it) => {
@@ -134,7 +134,7 @@ const generateDestinationSection = (selectedEventDestination) => {
 
 const generateDetailSection = (selectedEventType, eventOffers, selectedEventDestination, eventTypes) => {
   let sectionTemplate = ``;
-  const offer = genearteOfferSection(selectedEventType, eventOffers, eventTypes);
+  const offer = generateOfferSection(selectedEventType, eventOffers, eventTypes);
   const destination = generateDestinationSection(selectedEventDestination);
 
   if (offer.length > 0 || destination.length > 0) {
