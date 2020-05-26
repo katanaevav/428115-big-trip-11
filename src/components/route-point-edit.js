@@ -38,7 +38,7 @@ const generateEventTypesListTemplate = (events) => {
   ).join(`\n`);
 };
 
-const genetateFavoriteButton = (checked, isNewRoutePoint) => {
+const generateFavoriteButton = (checked, isNewRoutePoint) => {
   let favoriteButtonTemplate = ``;
   if (!isNewRoutePoint) {
     favoriteButtonTemplate = `<input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${checked}>
@@ -217,7 +217,7 @@ const createRoutePointEditTemplate = (routePoint, options = {}, isNewRoutePoint,
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
           <button class="event__reset-btn" type="reset">${resetButtonCaption}</button>
 
-          ${genetateFavoriteButton(isFavorite, isNewRoutePoint)}
+          ${generateFavoriteButton(isFavorite, isNewRoutePoint)}
           ${generateRollupButton(isNewRoutePoint)}
 
         </header>
