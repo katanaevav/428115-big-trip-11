@@ -2,7 +2,7 @@ import RoutePointComponent from "../components/route-point.js";
 import RoutePointEditComponent from "../components/route-point-edit.js";
 import {RenderPosition, render, remove, replace} from "../utils/render.js";
 import RoutePointModel from "../models/point.js";
-import {valuesForEscapeKey} from "../const.js";
+import {ValuesForEscapeKey} from "../const.js";
 
 const ON_VALUE = `on`;
 const FIRST_ELEMENT = 0;
@@ -233,7 +233,7 @@ export default class PointController {
   }
 
   _onEscKeyDown(evt) {
-    const isEscKey = evt.key === valuesForEscapeKey.FULL || evt.key === valuesForEscapeKey.SHORT;
+    const isEscKey = evt.key === ValuesForEscapeKey.FULL || evt.key === ValuesForEscapeKey.SHORT;
 
     if (isEscKey) {
       if (this._mode === Mode.ADDING) {

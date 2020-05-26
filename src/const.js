@@ -16,7 +16,7 @@ export const EventTypes = {
   ACTIVITY: `Activity`,
 };
 
-export const valuesForEscapeKey = {
+export const ValuesForEscapeKey = {
   FULL: `Escape`,
   SHORT: `Esc`,
 };
