@@ -31,26 +31,6 @@ export const getUniqueItems = (arr) => {
   return Array.from(new Set(arr));
 };
 
-export const getRandomBool = () => {
-  return Math.random() >= 0.5;
-};
-
-export const getRandomInt = (max) => {
-  return Math.floor(Math.random() * Math.floor(max));
-};
-
-export const getRandomNumbers = function (minNumber, maxNumber, count) {
-  const numbers = [];
-  let number;
-  while (numbers.length < count) {
-    number = Math.floor((minNumber + Math.random()) * maxNumber);
-    if (numbers.indexOf(number) === -1) {
-      numbers.push(number);
-    }
-  }
-  return numbers;
-};
-
 export const setDateToHTMLFormat = (dateInInt) => {
   return moment(dateInInt).format(`YYYY-MM-DDTHH:mm`);
 };
