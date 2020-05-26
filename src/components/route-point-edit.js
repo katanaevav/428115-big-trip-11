@@ -370,8 +370,7 @@ export default class RoutePoint extends AbstractSmartComponent {
       enableTime: true,
       altFormat: `d/m/y H:i`,
       altInput: true,
-      // eslint-disable-next-line
-      time_24hr: true,
+      [`time_24hr`]: true,
       defaultDate: this._routePoint.eventEndDate || `today`,
       onOpen() {
         this.set(`minDate`, startDate);
@@ -383,8 +382,7 @@ export default class RoutePoint extends AbstractSmartComponent {
       enableTime: true,
       altFormat: `d/m/y H:i`,
       altInput: true,
-      // eslint-disable-next-line
-      time_24hr: true,
+      [`time_24hr`]: true,
       defaultDate: startDate || `today`,
       onChange(selectedDates, dateStr) {
         startDate = dateStr;
