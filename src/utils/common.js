@@ -40,7 +40,7 @@ export const getRandomInt = (max) => {
 };
 
 export const getRandomNumbers = function (minNumber, maxNumber, count) {
-  let numbers = [];
+  const numbers = [];
   let number;
   while (numbers.length < count) {
     number = Math.floor((minNumber + Math.random()) * maxNumber);

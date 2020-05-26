@@ -15,15 +15,15 @@ export const Mode = {
 };
 
 const parseFormData = (formData, eventTypes, destinations) => {
-  let selectedOffers = [];
-  for (let key of formData.keys()) {
+  const selectedOffers = [];
+  for (const key of formData.keys()) {
     if (key.startsWith(`event-offer`)) {
       selectedOffers.push(key.substring(12));
     }
   }
   const eventTypeStructure = eventTypes.find((it) => it.name.toLowerCase() === formData.get(`event-type-data`).toLowerCase());
 
-  let selectedDestination = {};
+  const selectedDestination = {};
 
   const destination = destinations.find(((it) => {
     return it.name === formData.get(`event-destination`);
