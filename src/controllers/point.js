@@ -21,6 +21,7 @@ const parseFormData = (formData, eventTypes, destinations) => {
       selectedOffers.push(key.substring(12));
     }
   }
+
   const eventTypeStructure = eventTypes.find((it) => it.name.toLowerCase() === formData.get(`event-type-data`).toLowerCase());
 
   const selectedDestination = {};
