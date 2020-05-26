@@ -1,8 +1,8 @@
-import {uniqueItems, setDateToMonthDDFormat} from "../utils/common.js";
+import {getUniqueItems, setDateToMonthDDFormat} from "../utils/common.js";
 import AbstractComponent from "./abstract-component.js";
 
 const generateTripTitles = (routePoints) => {
-  const tripTitles = uniqueItems(routePoints.map((routePoint) => {
+  const tripTitles = getUniqueItems(routePoints.map((routePoint) => {
     return routePoint.eventDestination.name;
   }));
 

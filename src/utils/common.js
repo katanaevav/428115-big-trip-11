@@ -27,7 +27,7 @@ export const pretextFromEventType = (eventType) => {
   return eventType === EVENT_TYPE_TRANSFER ? PRETEXT_TRANSFER : PRETEXT_ACTIVITY;
 };
 
-export const uniqueItems = (arr) => {
+export const getUniqueItems = (arr) => {
   return Array.from(new Set(arr));
 };
 

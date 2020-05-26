@@ -1,4 +1,4 @@
-import {uniqueItems, generateTextDuration} from "../utils/common.js";
+import {getUniqueItems, generateTextDuration} from "../utils/common.js";
 import AbstractComponent from "./abstract-smart-component.js";
 import {EventTypes} from "../const.js";
 import Chart from "chart.js";
@@ -8,7 +8,7 @@ import moment from "moment";
 const BAR_HEIGHT = 55;
 
 const getRoutePointsTypeList = (routePoints, eventTypes) => {
-  return uniqueItems(routePoints.map((routePoint) => eventTypes.find((it) => it.name.toLowerCase() === routePoint.eventType.toLowerCase())));
+  return getUniqueItems(routePoints.map((routePoint) => eventTypes.find((it) => it.name.toLowerCase() === routePoint.eventType.toLowerCase())));
 };
 
 const getMoney = (routePointsTypes, routePoints) => {

@@ -1,4 +1,4 @@
-import {uniqueItems, pretextFromEventType, firstButtonUpCase} from "../utils/common.js";
+import {getUniqueItems, pretextFromEventType, firstButtonUpCase} from "../utils/common.js";
 import AbstractSmartComponent from "./abstract-smart-component.js";
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
@@ -27,7 +27,7 @@ const generateEventTypeTemplate = (eventName) => {
 };
 
 const generateEventTypesListTemplate = (events) => {
-  const groups = uniqueItems(events.map((it) => it.type));
+  const groups = getUniqueItems(events.map((it) => it.type));
   return groups.map((group) =>
     `<fieldset class="event__type-group">
       <legend class="visually-hidden">${group}</legend>
