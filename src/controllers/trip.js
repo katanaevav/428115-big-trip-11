@@ -64,6 +64,23 @@ export default class TripController {
     this._container.show();
   }
 
+  setSortDefault() {
+    this._sortComponent.setStartingSortPosition();
+    this._onSortTypeChange(SortType.EVENT);
+  }
+
+  createRoutePoint() {
+    if (this._creatingRoutePoint) {
+      return;
+    }
+
+    this._filterController.filterAtStart();
+    this._onFilterChange();
+    this._showedRoutePointControllers.forEach((it) => it.setDefaultView());
+    this._creatingRoutePoint = new PointController(this._daysComponent.getElement(), this._onDataChange, this._onViewChange, this._offersList, this._destinationsList);
+    this._creatingRoutePoint.render(getEmptyRoutePoint(this._offersList, this._destinationsList), RoutePointControllerMode.ADDING);
+  }
+
   render() {
     const tripEvents = this._container.getElement();
     const tripSorting = this._container.getHeaderElement();
@@ -107,23 +124,6 @@ export default class TripController {
 
     const newRoutePoints = this._renderRoutePointsWithDays(this._daysComponent, routePoints, sortType, this._onDataChange, this._onViewChange);
     this._showedRoutePointControllers = this._showedRoutePointControllers.concat(newRoutePoints);
-  }
-
-  setSortDefault() {
-    this._sortComponent.setStartingSortPosition();
-    this._onSortTypeChange(SortType.EVENT);
-  }
-
-  createRoutePoint() {
-    if (this._creatingRoutePoint) {
-      return;
-    }
-
-    this._filterController.filterAtStart();
-    this._onFilterChange();
-    this._showedRoutePointControllers.forEach((it) => it.setDefaultView());
-    this._creatingRoutePoint = new PointController(this._daysComponent.getElement(), this._onDataChange, this._onViewChange, this._offersList, this._destinationsList);
-    this._creatingRoutePoint.render(getEmptyRoutePoint(this._offersList, this._destinationsList), RoutePointControllerMode.ADDING);
   }
 
   _removeRoutePoints() {
